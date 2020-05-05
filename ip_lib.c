@@ -101,13 +101,13 @@ float get_normal_random(){
 }
 
 
-ip_mat * ip_mat_create(int w, int h, float v){
+ip_mat * ip_mat_create(int w, int h, int k, float v){
   int i,j,l;
   ip_mat nuova;
   nuova = (ip_mat) malloc(sizeof(struct ip_mat));/*non so se sta riga serve*/
   nuova->w = w;
   nuova->h = h;
-  nuova->k = k; /*sempre 3 quindi non so perche glielo passino*/
+  nuova->k = k;
   stats * st;
   st = (stats*) malloc(k * sizeof(stats));
   for ( i = 0; i < k; i++)
