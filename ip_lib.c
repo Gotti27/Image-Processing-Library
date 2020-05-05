@@ -101,37 +101,52 @@ float get_normal_random(){
 }
 
 
-ip_mat * ip_mat_create(int w, int h, int k, float v){
-  int i,j,l;
-  ip_mat nuova;
-  nuova = (ip_mat) malloc(sizeof(struct ip_mat));/*non so se sta riga serve*/
+ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
+  unsigned int i,j,l;
+  ip_mat *nuova;
+  stats * st;
+  float ***p3;
+
+  printf("ok\n");
+
+  nuova = malloc(sizeof(ip_mat));
   nuova->w = w;
   nuova->h = h;
   nuova->k = k;
-  stats * st;
-  st = (stats*) malloc(k * sizeof(stats));
-  for ( i = 0; i < k; i++)
-  {
-    st[i]->min =  v;
-    st[i]->max =  v;
-    st[i]->mean =  v;
+
+  printf("ok\n");
+
+  st = malloc(k * sizeof(stats));
+  printf("Mallocato\n");
+  for ( i = 0; i < k; i++){
+    printf("%f", v);
+    (&st[i])->min =  v;
+    printf("okl");
+    (&st[i])->max =  v;
+    (&st[i])->mean = v;
+    printf("okl\n");
   }
+  printf("%f", v);
   nuova->stat = st;
+  printf("ok\n");
   /* parkour */
-  double ***p3;
-  p3 = (double ***) malloc (h * sizeof(double**));
+  p3 = malloc (h * sizeof(float**));
   for ( i = 0; i < h; i++)
   {
-    p3[i]= (double **) malloc (w * sizeof(double*));
+    p3[i] =  malloc (w * sizeof(float*));
     for ( j = 0; j < w; j++)
     {
-      p3[i][j]= (double *) malloc (k * sizeof(double));
+      p3[i][j] = malloc (k * sizeof(float));
       for ( l = 0; l < k; l++)
       {
-        p3[i][j][k]= v;
+        p3[i][j][l] = v;
       }
     }
   }
+  printf("ok\n");
   nuova->data = p3;
-  return &nuova;
+  printf("ok\n");
+  return nuova;
 }
+
+void compute_stats(ip_mat * t){}
