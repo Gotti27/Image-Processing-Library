@@ -99,3 +99,39 @@ float get_normal_random(){
     return cos(2*PI*y2)*sqrt(-2.*log(y1));
 
 }
+
+
+ip_mat * ip_mat_create(int w, int h, float v){
+  int i,j,l;
+  ip_mat nuova;
+  nuova = (ip_mat) malloc(sizeof(struct ip_mat));/*non so se sta riga serve*/
+  nuova->w = w;
+  nuova->h = h;
+  nuova->k = k; /*sempre 3 quindi non so perche glielo passino*/
+  stats * st;
+  st = (stats*) malloc(k * sizeof(stats));
+  for ( i = 0; i < k; i++)
+  {
+    st[i]->min =  v;
+    st[i]->max =  v;
+    st[i]->mean =  v;
+  }
+  nuova->stat = st;
+  /* parkour */
+  double ***p3;
+  p3 = (double ***) malloc (h * sizeof(double**));
+  for ( i = 0; i < h; i++)
+  {
+    p3[i]= (double **) malloc (w * sizeof(double*));
+    for ( j = 0; j < w; j++)
+    {
+      p3[i][j]= (double *) malloc (k * sizeof(double));
+      for ( l = 0; l < k; l++)
+      {
+        p3[i][j][k]= v;
+      }
+    }
+  }
+  nuova->data = p3;
+  return &nuova;
+}
