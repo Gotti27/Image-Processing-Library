@@ -34,6 +34,7 @@ typedef struct {
  * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v);
+
 /* Libera la memoria (data, stat e la struttura) */
 void ip_mat_free(ip_mat *a);
 
