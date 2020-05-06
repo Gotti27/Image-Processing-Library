@@ -149,7 +149,46 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
   return nuova;
 }
 
-void compute_stats(ip_mat * t){}
+void compute_stats(ip_mat * t)
+{
+  unsigned int i,j,l;
+  float min,max,mean;
+  for(i=0;i< t->k;i++)
+  {
+    min =  t->data[0][0][i];/*penso qui scoppia*/
+    max =  t->data[0][0][i];
+    mean = 0.0;
+  }
+  for (i = 0; i < t->k; i++)
+  {
+    for ( j = 0; j < t->h; j++)
+    {
+      for ( l = 0; l < t->w; l++)
+      {
+        /*qui bisogna fare conti e ci sarà casino*/
+        if(t->data[j][l][i] > max )
+        {
+          max = t->data[j][l][i];
+        }
+        else
+        {
+          if(t->data[j][l][i] < min )
+          {
+            min = t->data[j][l][i];
+          }
+        }
+        mean += t->data[j][l][i] / (t->h * t->w);
+
+
+      }
+    }
+    (&t->stat[i])->min = min;
+    (&t->stat[i])->max = max;
+    (&t->stat[i])->mean = mean;
+  }
+  printf("ho finito\n" );
+}
+
 
 void ip_mat_free(ip_mat * t){
   int i,j;
