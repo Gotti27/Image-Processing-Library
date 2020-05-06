@@ -270,6 +270,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
             }
         }
         for(m = 0; m < a->k; m++){
+            /*da sistemare, non credo sia giusto*/
             if (a->stat[m]->min < b->stat[m]->min) {
                 sub->stat[m]->min = a->stat[m]->min;
             }
