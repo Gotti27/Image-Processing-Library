@@ -255,7 +255,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     if (a->w == b->w && a->h == b->h && a->k == b->k) {
-        int i,j,l,m;
+        int i,j,l;
         ip_mat * sub;
         sub = ip_mat_copy(a);
         for (i = 0; i < a->h; i++) {
@@ -275,7 +275,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     if(a->w == b->w && a->h == b->h && a->k == b->k){
-        int i,j,l,m;
+        int i,j,l;
         ip_mat * mean;
         for (i = 0; i < a->h; i++) {
             for(j = 0; j < a->w; j++){
