@@ -276,11 +276,12 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     if(a->w == b->w && a->h == b->h && a->k == b->k){
         int i,j,l;
-        ip_mat * mean;
+        ip_mat * mean = ip_mat_copy( a );
+
         for (i = 0; i < a->h; i++) {
             for(j = 0; j < a->w; j++){
                 for(l = 0; l < a->k; l++){
-                    mean[i][j][l] = (a->data[i][j][l] + b->data[i][j][l]) / 2;
+                    mean->data[i][j][l] = (a->data[i][j][l] + b->data[i][j][l]) / 2;
                 }
             }
         }
