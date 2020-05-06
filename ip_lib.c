@@ -239,14 +239,9 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
 }
 
 ip_mat * ip_mat_copy(ip_mat * in){
-    int i,j,l,m;
-    ip_mat * nuova;
-    nuova = ip_mat_create(in->h, in->w, in->k, 1.0);
-    for(m = 0; m < in->k; m++){
-        nuova->stat[m]->min = in->stat[m]->min;
-        nuova->stat[m]->max = in->stat[m]->max;
-        nuova->stat[m]->mean = in->stat[m]->mean;
-    }
+    int i,j,l;
+    ip_mat * copia;
+    copia = ip_mat_create(in->h, in->w, in->k, 1.0);
     for (i = 0; i < in->h; i++) {
         for(j = 0; j < in->w; j++){
             for(l = 0; l < in->k; l++){
@@ -254,7 +249,8 @@ ip_mat * ip_mat_copy(ip_mat * in){
             }
         }
     }
-    return nuova;
+    compute_stats(copia);
+    return copia;
 }
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
@@ -269,22 +265,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
                 }
             }
         }
-        for(m = 0; m < a->k; m++){
-            /*da sistemare, non credo sia giusto*/
-            if (a->stat[m]->min < b->stat[m]->min) {
-                sub->stat[m]->min = a->stat[m]->min;
-            }
-            else{
-                sub->stat[m]->min = b->stat[m]->min;
-            }
-            if (a->stat[m]->max > b->stat[m]->max) {
-                sub->stat[m]->max = a->stat[m]->max;
-            }
-            else{
-                sub->stat[m]->max = b->stat[m]->max;
-            }
-            sub->stat[m] = (sub->stat[m]->min + sub->stat[m]->max) / 2;
-        }
+        compute_stats(sub);
         return sub;
     }
     else{
@@ -303,11 +284,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
                 }
             }
         }
-        for(m = 0; m < a->k; m++){
-            mean->stat[m]->min = (a->stat[m]->min + b->stat[m]->min) / 2;
-            mean->stat[m]->max = (a->stat[m]->max + b->stat[m]->max) / 2;
-            mean->stat[m]->mean = (a->stat[m]->mean + b->stat[m]->mean) / 2;
-        }
+        compute_stats(mean);
         return mean;
     }
     else{
