@@ -193,6 +193,7 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
         }
       }
     }
+    compute_stats(sum);
     return sum;
   }
 
