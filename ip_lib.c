@@ -245,7 +245,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
     for (i = 0; i < in->h; i++) {
         for(j = 0; j < in->w; j++){
             for(l = 0; l < in->k; l++){
-                nuova[i][j][l] = in->data[i][j][l];
+                copia->data[i][j][l] = in->data[i][j][l];
             }
         }
     }
