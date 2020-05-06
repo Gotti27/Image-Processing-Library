@@ -150,3 +150,50 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
 }
 
 void compute_stats(ip_mat * t){}
+
+void ip_mat_free(ip_mat * t){
+  int i,j;
+  free(t->stat);
+
+  for (i = 0; i< t->h; i++){
+    for (j = 0; j< t->w; j++){
+      free(t->data[i][j]);
+    }
+    free(t->data[i]);
+  }
+  free(t->data);
+
+  free(t);
+}
+
+void ip_mat_init_random(ip_mat * t, float mean, float var){
+  int i, j, l;
+  for (i = 0; i < t->h; i++){
+    for (j = 0; j < t->w; j++){
+      for (l = 0; l < t->k; l++){
+        t->data[i][j][l] = var*get_normal_random() + mean;
+      }
+    }
+  }
+  compute_stats(t);
+}
+
+ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
+  if(a->w!=b->w || a->h!=b->h || a->k!=b->k){
+      exit(1);
+  }
+  else{
+    int i, j, l;
+    ip_mat* sum = ip_mat_copy( a );
+
+    for (i = 0; i < a->h; i++){
+      for (j = 0; j < a->w; j++){
+        for (l = 0; l < a->k; l++){
+          sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
+        }
+      }
+    }
+    return sum;
+  }
+
+}
