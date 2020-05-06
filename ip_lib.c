@@ -261,7 +261,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         for (i = 0; i < a->h; i++) {
             for(j = 0; j < a->w; j++){
                 for(l = 0; l < a->k; l++){
-                    sub[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
+                    sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
                 }
             }
         }
