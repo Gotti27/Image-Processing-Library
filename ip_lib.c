@@ -252,6 +252,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
 ip_mat * ip_mat_copy(ip_mat * in){
     int i,j,l;
     ip_mat * copia;
+
     copia = ip_mat_create(in->h, in->w, in->k, 1.0);
     for (i = 0; i < in->h; i++) {
         for(j = 0; j < in->w; j++){
@@ -260,6 +261,57 @@ ip_mat * ip_mat_copy(ip_mat * in){
             }
         }
     }
+
     compute_stats(copia);
     return copia;
+}
+
+ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
+  int i, j, l;
+  int rig=row_end-row_start;
+  int col= col_end-col_start;
+  ip_mat * nuova =  ip_mat_create(rig, col, t->k, 0.0);
+
+  for(i=0; i<rig; i++){
+    for(j=0; j<col; j++){
+      for(l=0; l<t->k; l++){
+        nuova->data[i][j][l] = t->data[i+row_start][j+col_start][l];
+      }
+    }
+  }
+
+  compute_stats(nuova);
+  return nuova;
+}
+
+ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
+  int i, j, l;
+  ip_mat * mus = ip_mat_copy(a);
+
+  for( i=0; i<a->h; i++){
+    for( j=0; j<a->w;j++){
+      for( l=0; l<a->k; l++){
+        mus->data[i][j][l]=c*(a->data[i][j][l]);
+      }
+    }
+  }
+
+  compute_stats(mus);
+  return mus;
+}
+
+ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
+  int i, j, l;
+  ip_mat * ads = ip_mat_copy(a);
+
+  for( i=0; i<a->h; i++){
+    for( j=0; j<a->w;j++){
+      for( l=0; l<a->k; l++){
+        ads->data[i][j][l]=c+(a->data[i][j][l]);
+      }
+    }
+  }
+
+  compute_stats(ads);
+  return ads;
 }
