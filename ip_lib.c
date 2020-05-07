@@ -292,3 +292,51 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
         exit(1);
     }
 }
+
+ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
+    if (a->w == b->w && a->h == b->h && a->k == b->k) {
+        int i,j,l;
+        ip_mat * sub;
+        sub = ip_mat_copy(a);
+        for (i = 0; i < a->h; i++) {
+            for(j = 0; j < a->w; j++){
+                for(l = 0; l < a->k; l++){
+                    sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
+                }
+            }
+        }
+        compute_stats(sub);
+        return sub;
+    }
+    else{
+        exit(1);
+    }
+}
+
+ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
+ ip_mat mus = ip_mat_create(a->h,a->w,a->k,0);
+  for(int i =0; i==a->h; i++){
+    for(int j=0; j==a->w;j++){
+      for(int h=0; h==a->k; h++){
+        mus[i][j][h]=c(a[h][w][k]);
+
+
+      }
+    }
+  }
+  return mus;
+}
+
+ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
+  ip_mat *ads = ip_mat_create(a->h,a->w,a->k,0);
+   for(int i =0; i==a->h; i++){
+     for(int j=0; j==a->w;j++){
+       for(int h=0; h==a->k; h++){
+         mus[i][j][h]=c+(a[h][w][k]);
+
+
+       }
+     }
+   }
+   return mus;
+}
