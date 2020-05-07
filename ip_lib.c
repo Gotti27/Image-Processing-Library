@@ -6,6 +6,7 @@
 #include "ip_lib.h"
 #include "bmp.h"
 
+
 void ip_mat_show(ip_mat * t){
     unsigned int i,l,j;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->h,t->w,t->k);
@@ -100,38 +101,165 @@ float get_normal_random(){
 
 }
 
+ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
+  unsigned int i,j,l;
+  ip_mat *nuova;
+  stats * st;
+  float ***p3;
 
-ip_mat * ip_mat_create(int w, int h, int k, float v){
-  int i,j,l;
-  ip_mat nuova;
-  nuova = (ip_mat) malloc(sizeof(struct ip_mat));/*non so se sta riga serve*/
+  nuova = malloc(sizeof(ip_mat));
   nuova->w = w;
   nuova->h = h;
   nuova->k = k;
-  stats * st;
-  st = (stats*) malloc(k * sizeof(stats));
-  for ( i = 0; i < k; i++)
-  {
-    st[i]->min =  v;
-    st[i]->max =  v;
-    st[i]->mean =  v;
+
+  st = malloc(k * sizeof(stats));
+  for ( i = 0; i < k; i++){
+    (&st[i])->min =  v;
+    (&st[i])->max =  v;
+    (&st[i])->mean = v;
   }
   nuova->stat = st;
-  /* parkour */
-  double ***p3;
-  p3 = (double ***) malloc (h * sizeof(double**));
-  for ( i = 0; i < h; i++)
-  {
-    p3[i]= (double **) malloc (w * sizeof(double*));
-    for ( j = 0; j < w; j++)
-    {
-      p3[i][j]= (double *) malloc (k * sizeof(double));
-      for ( l = 0; l < k; l++)
-      {
-        p3[i][j][k]= v;
+
+  p3 = malloc (h * sizeof(float**));
+  for ( i = 0; i < h; i++){
+    p3[i] =  malloc (w * sizeof(float*));
+    for ( j = 0; j < w; j++){
+      p3[i][j] = malloc (k * sizeof(float));
+      for ( l = 0; l < k; l++){
+        p3[i][j][l] = v;
       }
     }
   }
   nuova->data = p3;
-  return &nuova;
+
+  return nuova;
+}
+
+void compute_stats(ip_mat * t){
+  unsigned int i, j, l;
+  float min,max,mean;
+
+  for (l = 0; l < t->k; l++){
+    min =  t->data[0][0][l];
+    max =  t->data[0][0][l];
+    mean = 0.0;
+
+    for ( i = 0; i < t->h; i++){
+      for ( j = 0; j < t->w; j++){
+        if(t->data[i][j][l] > max ){
+          max = t->data[i][j][l];
+        }
+        if(t->data[i][j][l] < min ){
+          min = t->data[i][j][l];
+        }
+        mean += t->data[i][j][l] / (t->h * t->w);
+      }
+    }
+
+    (&t->stat[l])->min = min;
+    (&t->stat[l])->max = max;
+    (&t->stat[l])->mean = mean;
+  }
+}
+
+void ip_mat_free(ip_mat * t){
+  int i,j;
+  free(t->stat);
+
+  for (i = 0; i< t->h; i++){
+    for (j = 0; j< t->w; j++){
+      free(t->data[i][j]);
+    }
+    free(t->data[i]);
+  }
+  free(t->data);
+
+  free(t);
+}
+
+void ip_mat_init_random(ip_mat * t, float mean, float var){
+  int i, j, l;
+  for (i = 0; i < t->h; i++){
+    for (j = 0; j < t->w; j++){
+      for (l = 0; l < t->k; l++){
+        t->data[i][j][l] = var*get_normal_random() + mean;
+      }
+    }
+  }
+  compute_stats(t);
+}
+
+ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
+  if (a->w == b->w && a->h == b->h && a->k == b->k) {
+      int i, j, l;
+      ip_mat * sum = ip_mat_copy(a);
+
+      for (i = 0; i < a->h; i++) {
+          for(j = 0; j < a->w; j++){
+              for(l = 0; l < a->k; l++){
+                  sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
+              }
+          }
+      }
+      compute_stats(sum);
+      return sum;
+    }
+  else{
+    exit(1);
+  }
+}
+
+ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
+    if (a->w == b->w && a->h == b->h && a->k == b->k) {
+        int i, j, l;
+        ip_mat * sub = ip_mat_copy(a);
+
+        for (i = 0; i < a->h; i++) {
+            for(j = 0; j < a->w; j++){
+                for(l = 0; l < a->k; l++){
+                    sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
+                }
+            }
+        }
+        compute_stats(sub);
+        return sub;
+      }
+    else{
+      exit(1);
+    }
+}
+
+ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
+    if(a->w == b->w && a->h == b->h && a->k == b->k){
+        int i, j, l;
+        ip_mat * mean = ip_mat_copy( a );
+
+        for (i = 0; i < a->h; i++) {
+            for(j = 0; j < a->w; j++){
+                for(l = 0; l < a->k; l++){
+                    mean->data[i][j][l] = (a->data[i][j][l] + b->data[i][j][l]) / 2;
+                }
+            }
+        }
+        compute_stats(mean);
+        return mean;
+    }
+    else{
+        exit(1);
+    }
+}
+
+ip_mat * ip_mat_copy(ip_mat * in){
+    int i,j,l;
+    ip_mat * copia;
+    copia = ip_mat_create(in->h, in->w, in->k, 1.0);
+    for (i = 0; i < in->h; i++) {
+        for(j = 0; j < in->w; j++){
+            for(l = 0; l < in->k; l++){
+                copia->data[i][j][l] = in->data[i][j][l];
+            }
+        }
+    }
+    compute_stats(copia);
+    return copia;
 }
