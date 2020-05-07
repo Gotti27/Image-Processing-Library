@@ -156,110 +156,42 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
 }
 
 
-ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione)/*se le dimensioni che non unisco sono diverse va in segmentazione*/
-{
+ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
   ip_mat * out;
-  unsigned int i,j,l,recap;
+  unsigned int i,j,l;
+  int di=0, dj=0, dl=0;
 
-  if (dimensione == 0)/*dim==0 -> unisco a->h e b->h*/
-  {
-    recap = a->h;
-    out = ip_mat_create((a->h + b->h), a->w,a->k,0);
+  if (dimensione == 0 && a->w == b-> w && a->k == b->k){
+    out = ip_mat_create((a->h + b->h), a->w,a->k,  0);
+    di = a->h;
+  }
+  else if(dimensione == 1 && a->h == b->h && a->k == b->k){
+    out = ip_mat_create(a->h, (a->w + b->w), a->k, 0);
+    dj = a->w;
+  }
+  else if(dimensione == 2 && a->h == b->h && a->w == b->w){
+    out = ip_mat_create(a->h, a->w, (a->k + b->k),0);
+    dl = a->k;
+  }
+  else{
+    exit(1);
+  }
 
-    for ( i = 0; i < a->h; i++)
-    {
-      for (j = 0; j < a->w; j++)
-      {
-        for (l = 0; l < a->k; l++)
-        {
+  for (i = 0; i < out->h; i++){
+    for (j = 0; j < out->w; j++){
+      for (l = 0; l < out->k; l++){
+        if (i<di || j<dj || l<dl){
           out->data[i][j][l] = a->data[i][j][l];
+        } else {
+          out->data[i][j][l] = b->data[i-di][j-dj][l-dl];
         }
       }
-    }
-
-    ip_mat_free(a);/*svuoto memoria di a visto che l'ho già copiata*/
-
-    for ( i = recap; i < out->h; i++)
-    {
-      for (j = 0; j < out->w; j++)
-      {
-        for (l = 0; l < out->k; l++)
-        {
-          out->data[i][j][l] = b->data[i-recap][j][l];
-        }
-      }
-    }
-
-  }
-  else
-  {
-    if (dimensione == 1)/*dim==1 -> unisco a->w e b->w*/
-    {
-      recap = a->w;
-      out = ip_mat_create( a->h,a->w + b->w,a->k,0);
-
-      for ( i = 0; i < out->h; i++)
-      {
-        for (j = 0; j < recap; j++)
-        {
-          for (l = 0; l < out->k; l++)
-          {
-            out->data[i][j][l] = a->data[i][j][l];
-          }
-        }
-      }
-
-      ip_mat_free(a);/*svuoto memoria di a visto che l'ho già copiata*/
-
-      for ( i = 0; i < out->h; i++)
-      {
-        for (j = recap; j < out->w; j++)
-        {
-          for (l = 0; l < out->k; l++)
-          {
-            out->data[i][j][l] = b->data[i][j-recap][l];
-          }
-        }
-      }
-
-    }
-    else/*dim==2 -> unisco a->k e b->k*/
-    {
-      recap = a->k;
-      out = ip_mat_create( a->h,a->w,a->k + b->k,0);
-
-      for ( i = 0; i < a->h; i++)
-      {
-        for (j = 0; j < a->w; j++)
-        {
-          for (l = 0; l < a->k; l++)
-          {
-            out->data[i][j][l] = a->data[i][j][l];
-          }
-        }
-      }
-
-      ip_mat_free(a);/*svuoto memoria di a visto che l'ho già copiata*/
-
-      for ( i = 0; i < out->h; i++)
-      {
-        for (j = 0; j < out->w; j++)
-        {
-          for (l = recap; l < out->k; l++)
-          {
-            out->data[i][j][l] = b->data[i][j][l-recap];
-          }
-        }
-      }
-      
     }
   }
 
-  ip_mat_free(b);/*svuoto memoria di b*/
   compute_stats(out);
   return out;
 }
-
 
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
   if (a->w == b->w && a->h == b->h && a->k == b->k) {
