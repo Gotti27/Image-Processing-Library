@@ -338,5 +338,5 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
        }
      }
    }
-   return mus;
+   return ads;
 }
