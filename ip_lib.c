@@ -6,6 +6,7 @@
 #include "ip_lib.h"
 #include "bmp.h"
 
+
 void ip_mat_show(ip_mat * t){
     unsigned int i,l,j;
     printf("Matrix of size %d x %d x %d (hxwxk)\n",t->h,t->w,t->k);
@@ -100,95 +101,66 @@ float get_normal_random(){
 
 }
 
-
 ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
   unsigned int i,j,l;
   ip_mat *nuova;
   stats * st;
   float ***p3;
 
-  printf("ok\n");
-
   nuova = malloc(sizeof(ip_mat));
   nuova->w = w;
   nuova->h = h;
   nuova->k = k;
 
-  printf("ok\n");
-
   st = malloc(k * sizeof(stats));
-  printf("Mallocato\n");
   for ( i = 0; i < k; i++){
-    printf("%f", v);
     (&st[i])->min =  v;
-    printf("okl");
     (&st[i])->max =  v;
     (&st[i])->mean = v;
-    printf("okl\n");
   }
-  printf("%f", v);
   nuova->stat = st;
-  printf("ok\n");
-  /* parkour */
+
   p3 = malloc (h * sizeof(float**));
-  for ( i = 0; i < h; i++)
-  {
+  for ( i = 0; i < h; i++){
     p3[i] =  malloc (w * sizeof(float*));
-    for ( j = 0; j < w; j++)
-    {
+    for ( j = 0; j < w; j++){
       p3[i][j] = malloc (k * sizeof(float));
-      for ( l = 0; l < k; l++)
-      {
+      for ( l = 0; l < k; l++){
         p3[i][j][l] = v;
       }
     }
   }
-  printf("ok\n");
   nuova->data = p3;
-  printf("ok\n");
+
   return nuova;
 }
 
-void compute_stats(ip_mat * t)
-{
-  unsigned int i,j,l;
+void compute_stats(ip_mat * t){
+  unsigned int i, j, l;
   float min,max,mean;
-  for(i=0;i< t->k;i++)
-  {
-    min =  t->data[0][0][i];/*penso qui scoppia*/
-    max =  t->data[0][0][i];
+
+  for (l = 0; l < t->k; l++){
+    min =  t->data[0][0][l];
+    max =  t->data[0][0][l];
     mean = 0.0;
-  }
-  for (i = 0; i < t->k; i++)
-  {
-    for ( j = 0; j < t->h; j++)
-    {
-      for ( l = 0; l < t->w; l++)
-      {
-        /*qui bisogna fare conti e ci sarà casino*/
-        if(t->data[j][l][i] > max )
-        {
-          max = t->data[j][l][i];
-        }
-        else
-        {
-          if(t->data[j][l][i] < min )
-          {
-            min = t->data[j][l][i];
-          }
-        }
-        mean += t->data[j][l][i] / (t->h * t->w);
 
-
+    for ( i = 0; i < t->h; i++){
+      for ( j = 0; j < t->w; j++){
+        if(t->data[i][j][l] > max ){
+          max = t->data[i][j][l];
+        }
+        if(t->data[i][j][l] < min ){
+          min = t->data[i][j][l];
+        }
+        mean += t->data[i][j][l] / (t->h * t->w);
       }
     }
-    (&t->stat[i])->min = min;
-    (&t->stat[i])->max = max;
-    (&t->stat[i])->mean = mean;
-  }
-  printf("ho finito\n" );
-}
 
+    (&t->stat[l])->min = min;
+    (&t->stat[l])->max = max;
+    (&t->stat[l])->mean = mean;
+  }
+}
 
 void ip_mat_free(ip_mat * t){
   int i,j;
@@ -218,46 +190,30 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
 }
 
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
-  if(a->w!=b->w || a->h!=b->h || a->k!=b->k){
-      exit(1);
-  }
-  else{
-    int i, j, l;
-    ip_mat* sum = ip_mat_copy( a );
+  if (a->w == b->w && a->h == b->h && a->k == b->k) {
+      int i, j, l;
+      ip_mat * sum = ip_mat_copy(a);
 
-    for (i = 0; i < a->h; i++){
-      for (j = 0; j < a->w; j++){
-        for (l = 0; l < a->k; l++){
-          sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
-        }
+      for (i = 0; i < a->h; i++) {
+          for(j = 0; j < a->w; j++){
+              for(l = 0; l < a->k; l++){
+                  sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
+              }
+          }
       }
+      compute_stats(sum);
+      return sum;
     }
-    compute_stats(sum);
-    return sum;
+  else{
+    exit(1);
   }
-
-}
-
-ip_mat * ip_mat_copy(ip_mat * in){
-    int i,j,l;
-    ip_mat * copia;
-    copia = ip_mat_create(in->h, in->w, in->k, 1.0);
-    for (i = 0; i < in->h; i++) {
-        for(j = 0; j < in->w; j++){
-            for(l = 0; l < in->k; l++){
-                copia->data[i][j][l] = in->data[i][j][l];
-            }
-        }
-    }
-    compute_stats(copia);
-    return copia;
 }
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     if (a->w == b->w && a->h == b->h && a->k == b->k) {
-        int i,j,l;
-        ip_mat * sub;
-        sub = ip_mat_copy(a);
+        int i, j, l;
+        ip_mat * sub = ip_mat_copy(a);
+
         for (i = 0; i < a->h; i++) {
             for(j = 0; j < a->w; j++){
                 for(l = 0; l < a->k; l++){
@@ -267,15 +223,15 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
         }
         compute_stats(sub);
         return sub;
-    }
+      }
     else{
-        exit(1);
+      exit(1);
     }
 }
 
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     if(a->w == b->w && a->h == b->h && a->k == b->k){
-        int i,j,l;
+        int i, j, l;
         ip_mat * mean = ip_mat_copy( a );
 
         for (i = 0; i < a->h; i++) {
@@ -293,50 +249,69 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     }
 }
 
+ip_mat * ip_mat_copy(ip_mat * in){
+    int i,j,l;
+    ip_mat * copia;
+
+    copia = ip_mat_create(in->h, in->w, in->k, 1.0);
+    for (i = 0; i < in->h; i++) {
+        for(j = 0; j < in->w; j++){
+            for(l = 0; l < in->k; l++){
+                copia->data[i][j][l] = in->data[i][j][l];
+            }
+        }
+    }
+
+    compute_stats(copia);
+    return copia;
+}
+
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
-  int i;
-  int j;
-  int g=0;
+  int i, j, l;
   int rig=row_end-row_start;
   int col= col_end-col_start;
-  ip_mat nuova =  ip_mat_create(   col,    rig,   t->k, 0);
-  for(i=0;i==col;i++){
-    for(j=0;j==rig;j++){
-      for(g=0;g==3;g++){
-        /*int l=0,a=0,m=0;*/
-        nuova->data[i][j][g]= t->data[i+col_start][j+col_start][t->k];
+  ip_mat * nuova =  ip_mat_create(rig, col, t->k, 0.0);
 
+  for(i=0; i<rig; i++){
+    for(j=0; j<col; j++){
+      for(l=0; l<t->k; l++){
+        nuova->data[i][j][l] = t->data[i+row_start][j+col_start][l];
       }
     }
   }
+
+  compute_stats(nuova);
   return nuova;
-  printf("esplodi");
 }
 
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
- ip_mat mus = ip_mat_create(a->h,a->w,a->k,0);
-  for(int i =0; i==a->h; i++){
-    for(int j=0; j==a->w;j++){
-      for(int h=0; h==a->k; h++){
-        mus[i][j][h]=c(a[h][w][k]);
+  int i, j, l;
+  ip_mat * mus = ip_mat_copy(a);
 
-
+  for( i=0; i<a->h; i++){
+    for( j=0; j<a->w;j++){
+      for( l=0; l<a->k; l++){
+        mus->data[i][j][l]=c*(a->data[i][j][l]);
       }
     }
   }
+
+  compute_stats(mus);
   return mus;
 }
 
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
-  ip_mat *ads = ip_mat_create(a->h,a->w,a->k,0);
-   for(int i =0; i==a->h; i++){
-     for(int j=0; j==a->w;j++){
-       for(int h=0; h==a->k; h++){
-         mus[i][j][h]=c+(a[h][w][k]);
+  int i, j, l;
+  ip_mat * ads = ip_mat_copy(a);
 
+  for( i=0; i<a->h; i++){
+    for( j=0; j<a->w;j++){
+      for( l=0; l<a->k; l++){
+        ads->data[i][j][l]=c+(a->data[i][j][l]);
+      }
+    }
+  }
 
-       }
-     }
-   }
-   return ads;
+  compute_stats(ads);
+  return ads;
 }
