@@ -293,24 +293,24 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     }
 }
 
-ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
-    if (a->w == b->w && a->h == b->h && a->k == b->k) {
-        int i,j,l;
-        ip_mat * sub;
-        sub = ip_mat_copy(a);
-        for (i = 0; i < a->h; i++) {
-            for(j = 0; j < a->w; j++){
-                for(l = 0; l < a->k; l++){
-                    sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
-                }
-            }
-        }
-        compute_stats(sub);
-        return sub;
+ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
+  int i;
+  int j;
+  int g=0;
+  int rig=row_end-row_start;
+  int col= col_end-col_start;
+  ip_mat nuova =  ip_mat_create(   col,    rig,   t->k, 0);
+  for(i=0;i==col;i++){
+    for(j=0;j==rig;j++){
+      for(g=0;g==3;g++){
+        /*int l=0,a=0,m=0;*/
+        nuova->data[i][j][g]= t->data[i+col_start][j+col_start][t->k];
+
+      }
     }
-    else{
-        exit(1);
-    }
+  }
+  return nuova;
+  printf("esplodi");
 }
 
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
