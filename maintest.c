@@ -1,3 +1,4 @@
+
 #include "ip_lib.h"
 #include "bmp.h"
 #include <stdlib.h>
@@ -5,14 +6,24 @@
 
 
 int main(){
-  ip_mat *a;
-  printf("\n\tStart your engines\n");
-  a = ip_mat_create(5, 5, 3, 10.0);
-  printf("Nope");
+  ip_mat *a, *b, *c;
+  Bitmap *photo;
+
+  photo = bm_load("flower.bmp");
+  a = bitmap_to_ip_mat(photo);
+
+  photo = bm_load("fullmoon.bmp");
+  b = bitmap_to_ip_mat(photo);
 
 
-  ip_mat_show( a );
+  c = ip_mat_corrupt( a, 50.0);
 
-  /*printf("Hello World!\n");*/
+  photo = ip_mat_to_bitmap( c );
+  bm_save( photo, "testphoto.bmp" );
+  bm_free( photo );
+
+  ip_mat_free( a );
+
   return 0;
 }
+
