@@ -324,10 +324,10 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
       for (i = 0; i < blended->h; i++) {
             for(j = 0; j < blended->w; j++){
                 for(l = 0; l < blended->k; l++){
+                  if (i < h && j< w && k < k) {
                     blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
                   }
-                  else
-                  {
+                  else {
                     blended->data[i][j][l] = a->data[i][j][l];
                   }
                 }
