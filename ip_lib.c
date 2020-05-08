@@ -287,8 +287,30 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     else{
         exit(1);
     }
-}
+} 
 
+
+ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
+  ip mat * blended;
+  if(a->h == b->h && a->w == b->w && a->k == b->k && alpha >=0 && alpha <=1)
+    {
+      unsigned int i,j,l;
+      blended = ip_mat_create(a->h,a->w,a->k,0);
+      for (i = 0; i < blended->h; i++) {
+            for(j = 0; j < blended->w; j++){
+                for(l = 0; l < blended->k; l++){
+                    blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
+                }
+            }
+        }
+    }
+    else
+    {
+      printf("immagini di dimensione diversa o alpha di dimensione errata\n");
+      exit(1);
+
+    }
+}
 
 float get_normal_random(){
     float y1 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
