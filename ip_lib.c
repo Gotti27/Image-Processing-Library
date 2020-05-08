@@ -344,6 +344,13 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
     return blended;
 }
 
+ip_mat * ip_mat_brighten(ip_mat * a, float bright){
+ ip_mat * lux = ip_mat_add_scalar( a,  bright);
+ clamp(lux,0.0,255.0);
+ compute_stats (lux);
+ return lux;
+}
+
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
   ip_mat * b = ip_mat_copy(a);
   int mean = ((&a->stat[0])->mean + (&a->stat[1])->mean + (&a->stat[2])->mean ) /3;
