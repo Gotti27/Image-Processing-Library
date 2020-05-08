@@ -320,24 +320,16 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
       h = a->h;
       w = a->w;
       k = a->k;
-      
-      if(a->h > b->h)
-      {
-        h = b->h;
-      }
-      if(a->w > b->w)
-      {
-        w = b->w;
-      }
-      if(a->k > b->k)
-      {
-        k = b->k;
-      }
-      blended = ip_mat_create(h,w,k,0);
-      for (i = 0; i < h; i++) {
-            for(j = 0; j < w; j++){
-                for(l = 0; l < k; l++){
+      blended = ip_mat_create(a->h,a->w,a->k,0);
+      for (i = 0; i < blended->h; i++) {
+            for(j = 0; j < blended->w; j++){
+                for(l = 0; l < blended->k; l++){
                     blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
+                  }
+                  else
+                  {
+                    blended->data[i][j][l] = a->data[i][j][l];
+                  }
                 }
             }
         }
