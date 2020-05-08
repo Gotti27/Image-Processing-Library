@@ -289,7 +289,7 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     }
 } 
 
-
+/*
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
   ip mat * blended;
   if(a->h == b->h && a->w == b->w && a->k == b->k && alpha >=0 && alpha <=1)
@@ -310,6 +310,46 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
       exit(1);
 
     }
+}
+*/
+ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due immagini ne da un'altra creata dalle dimensioni minori*/
+  ip_mat * blended;
+  if(alpha >=0 && alpha <=1)
+    {
+      unsigned int i,j,l,h,w,k;
+      h = a->h;
+      w = a->w;
+      k = a->k;
+      
+      if(a->h > b->h)
+      {
+        h = b->h;
+      }
+      if(a->w > b->w)
+      {
+        w = b->w;
+      }
+      if(a->k > b->k)
+      {
+        k = b->k;
+      }
+      blended = ip_mat_create(h,w,k,0);
+      for (i = 0; i < h; i++) {
+            for(j = 0; j < w; j++){
+                for(l = 0; l < k; l++){
+                    blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
+                }
+            }
+        }
+    }
+    else
+    {
+      printf(" alpha di dimensione errata\n");
+      exit(1);
+
+    }
+    compute_stats(blended);
+    return blended;
 }
 
 float get_normal_random(){
