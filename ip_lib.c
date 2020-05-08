@@ -352,6 +352,43 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
     return blended;
 }
 
+ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
+  ip_mat * b = ip_mat_copy(a);
+  int mean = ((&a->stat[0])->mean + (&a->stat[1])->mean + (&a->stat[2])->mean ) /3;
+
+  ip_mat_init_random(b, mean, amount);
+  b = ip_mat_sum(a, b);
+
+  return b;
+}
+
+void rescale(ip_mat * t, float new_max){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
+      }
+    }
+  }
+}
+
+void clamp(ip_mat * t, float low, float high){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        if (t->data[i][j][l] > high)
+          t->data[i][j][l] = 255.0;
+        if (t->data[i][j][l] > high)
+          t->data[i][j][l] = 0.0;
+      }
+    }
+  }
+}
+
 float get_normal_random(){
     float y1 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
     float y2 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
