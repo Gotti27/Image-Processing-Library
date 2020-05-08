@@ -381,5 +381,6 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
             }
         }
     }
+    compute_stats(bw);
     return bw;
 }
