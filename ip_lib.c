@@ -375,10 +375,11 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
-            int mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 2;
+            int mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 3;
             for(l = 0; l < in->k; l++){
                 bw->data[i][j][l] = mean;
             }
         }
     }
+    return bw;
 }
