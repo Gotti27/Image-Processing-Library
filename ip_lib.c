@@ -268,7 +268,6 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
   return ads;
 }
 
-
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     if(a->w == b->w && a->h == b->h && a->k == b->k){
         int i, j, l;
@@ -287,7 +286,22 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     else{
         exit(1);
     }
-} 
+}
+
+ip_mat * ip_mat_to_gray_scale(ip_mat * in){
+    int i, j, l;
+    ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
+    for(i = 0; i < in->h; i++){
+        for(j = 0; j < in->w; j++){
+            int mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 3;
+            for(l = 0; l < in->k; l++){
+                bw->data[i][j][l] = mean;
+            }
+        }
+    }
+    compute_stats(bw);
+    return bw;
+}
 
 /*
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
@@ -466,19 +480,4 @@ void ip_mat_show_stats(ip_mat * t){
         printf("\t Max: %f\n", t->stat[k].max);
         printf("\t Mean: %f\n", t->stat[k].mean);
     }
-}
-
-ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    int i, j, l;
-    ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
-    for(i = 0; i < in->h; i++){
-        for(j = 0; j < in->w; j++){
-            int mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 3;
-            for(l = 0; l < in->k; l++){
-                bw->data[i][j][l] = mean;
-            }
-        }
-    }
-    compute_stats(bw);
-    return bw;
 }
