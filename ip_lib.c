@@ -366,11 +366,15 @@ ip_mat * ip_mat_brighten(ip_mat * a, float bright){
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
+ if (amount < 0 || amount > 255){
+   exit(1);
+ }
   ip_mat * b = ip_mat_copy(a);
   int mean = ((&a->stat[0])->mean + (&a->stat[1])->mean + (&a->stat[2])->mean ) /3;
 
   ip_mat_init_random(b, mean, amount);
   b = ip_mat_sum(a, b);
+  compute_stats(b)
 
   return b;
 }
