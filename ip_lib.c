@@ -485,3 +485,40 @@ void ip_mat_show_stats(ip_mat * t){
         printf("\t Mean: %f\n", t->stat[k].mean);
     }
 }
+
+
+
+//funzione ancora in fase di test
+ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
+    /*da capire come funziona il parametro k,
+    per il momento suppongo sia sempre k = 1
+    */
+    ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
+    int i, j, x, y;
+    int cx = w / 2;
+    int cy = h / 2;
+    int sum = 0;
+
+    for(i = 0; i < w; i++){ /*attenzione a righe-colonne*/
+        for(j = 0; j < h; j++){
+            float value;
+            x = i - cx;
+            y = j - cy;
+            value = (1/(2*PI*sigma*sigma))*exp(-(x*x+y*y)/(2*sigma*sigma));
+            sum += value;
+            set_val(gaussian, i, j, k, value);
+        }
+    }
+
+    //normalizzare
+    for(i = 0; i < w; i++){ /*attenzione a righe-colonne*/
+        for(j = 0; j < h; j++){
+            float value = get_val(i, j, k);
+            value /= sum;
+            set_val(gaussian, i, j, k, value);
+        }
+    }
+
+    compute_stats(gaussian);
+    return gaussian;
+}
