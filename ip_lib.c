@@ -512,8 +512,6 @@ void ip_mat_show_stats(ip_mat * t){
     }
 }
 
-
-
 /*funzione ancora in fase di test*/
 ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
     /*da capire come funziona il parametro k,
@@ -539,7 +537,7 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
     /*normalizzare*/
     for(i = 0; i < w; i++){ /*attenzione a righe-colonne*/
         for(j = 0; j < h; j++){
-            float value = get_val(i, j, k);
+            float value = get_val(gaussian, i, j, k);
             value /= sum;
             set_val(gaussian, i, j, k, value);
         }
