@@ -374,7 +374,7 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
 
   ip_mat_init_random(b, mean, amount);
   b = ip_mat_sum(a, b);
-  compute_stats(b)
+  compute_stats(b);
 
   return b;
 }
@@ -514,7 +514,7 @@ void ip_mat_show_stats(ip_mat * t){
 
 
 
-//funzione ancora in fase di test
+/*funzione ancora in fase di test*/
 ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
     /*da capire come funziona il parametro k,
     per il momento suppongo sia sempre k = 1
