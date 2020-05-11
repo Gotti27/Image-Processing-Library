@@ -425,7 +425,7 @@ void clamp(ip_mat * t, float low, float high){
       for(l=0; l<t->k; l++){
         if (t->data[i][j][l] > high)
           t->data[i][j][l] = 255.0;
-        if (t->data[i][j][l] > high)
+        if (t->data[i][j][l] < low)
           t->data[i][j][l] = 0.0;
       }
     }
