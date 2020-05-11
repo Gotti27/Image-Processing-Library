@@ -536,7 +536,7 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
         }
     }
 
-    //normalizzare
+    /*normalizzare*/
     for(i = 0; i < w; i++){ /*attenzione a righe-colonne*/
         for(j = 0; j < h; j++){
             float value = get_val(i, j, k);
