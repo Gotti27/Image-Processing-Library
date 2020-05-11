@@ -379,6 +379,32 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
   return b;
 }
 
+ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
+  int deltaW, deltaH;
+  ip_mat * filtered;
+  int i, j, l, I, J, L;
+
+  deltaW = (f->w -1) / 2;
+  deltaH = (f->h -1) / 2;
+
+  filtered = ip_mat_create( a->h - deltaH * 2, a->w - deltaW * 2, a->k, 0);
+
+  for( I = deltaH; I < filtered->h - deltaH; I++ ){
+  	for( J = deltaW; J < filtered->w - deltaW; J++ ){
+  	  for( L = 0; L < filtered->k; L++ ){
+
+  	  	for( i = 0; i < f->h; i++ ){
+  	  	  for( j= 0; j < f-> w; j++ ){
+  	  	  	filtered->data[I][J][L] += f->data[i][j][0] * a->data[I-deltaH+i][J-deltaW+j][L];
+  	  	  }
+  	  	}
+
+  	  }
+  	}
+  }
+  return filtered;
+}
+
 void rescale(ip_mat * t, float new_max){
   int i, j, l;
 
@@ -399,7 +425,7 @@ void clamp(ip_mat * t, float low, float high){
       for(l=0; l<t->k; l++){
         if (t->data[i][j][l] > high)
           t->data[i][j][l] = 255.0;
-        if (t->data[i][j][l] > high)
+        if (t->data[i][j][l] < low)
           t->data[i][j][l] = 0.0;
       }
     }
