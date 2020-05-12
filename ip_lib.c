@@ -338,7 +338,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
       for (i = 0; i < blended->h; i++) {
             for(j = 0; j < blended->w; j++){
                 for(l = 0; l < blended->k; l++){
-                  if (i < h && j< w && k < k) {
+                  if (i < h && j< w && l < k) {
                     blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
                   }
                   else {
@@ -366,9 +366,10 @@ ip_mat * ip_mat_brighten(ip_mat * a, float bright){
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
- if (amount < 0 || amount > 255){
+  if (amount < 0 || amount > 255){
    exit(1);
- }
+  }else{
+
   ip_mat * b = ip_mat_copy(a);
   int mean = ((&a->stat[0])->mean + (&a->stat[1])->mean + (&a->stat[2])->mean ) /3;
 
@@ -377,12 +378,13 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
   compute_stats(b);
 
   return b;
+  }
 }
 
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   int deltaW, deltaH;
   ip_mat * filtered;
-  int i, j, l, I, J, L;
+  int i, j, I, J, L;
 
   deltaW = (f->w -1) / 2;
   deltaH = (f->h -1) / 2;
