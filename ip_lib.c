@@ -427,7 +427,117 @@ ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che i
 }
 
 
+ip_mat * create_sharpen_filter(){
+  ip_mat *sharpen = ip_mat_create(3,3,1,1.0);
+  set_val(sharpen,0,0,0,0);
+  set_val(sharpen,0,2,0,0);
+  set_val(sharpen,2,2,0,0);
+  set_val(sharpen,2,0,0,0);
+  set_val(sharpen,0,1,0,-1);
+  set_val(sharpen,1,0,0,-1);
+  set_val(sharpen,1,2,0,-1);
+  set_val(sharpen,2,1,0,-1);
+  set_val(sharpen,1,1,0,5);
+  compute_stats(sharpen);
+  return sharpen;
+}
 
+ip_mat * create_edge_filter(){
+  ip_mat *edge = ip_mat_create(3,3,1,1.0);
+  set_val(edge,0,0,0,-1);
+  set_val(edge,0,1,0,-1);
+  set_val(edge,0,2,0,-1);
+  set_val(edge,1,0,0,-1);
+  set_val(edge,1,2,0,-1);
+  set_val(edge,2,0,0,-1);
+  set_val(edge,2,1,0,-1);
+  set_val(edge,2,2,0,-1);
+  set_val(edge,1,1,0,8);
+  compute_stats(edge);
+  return edge;
+}
+
+ip_mat * create_emboss_filter(){
+  ip_mat *emboss = ip_mat_create(3,3,1,1.0);
+  set_val(emboss,0,0,0,-2);
+  set_val(emboss,0,1,0,-1);
+  set_val(emboss,0,2,0,0);
+  set_val(emboss,1,0,0,-1);
+  set_val(emboss,1,1,0,1);
+  set_val(emboss,1,2,0,1);
+  set_val(emboss,2,0,0,0);
+  set_val(emboss,2,1,0,1);
+  set_val(emboss,2,2,0,2);
+  compute_stats(emboss);
+  return emboss;
+}
+
+ip_mat * create_average_filter(int w, int h, int k){
+  float c=1.0/(w*h);
+
+  ip_mat * avg = ip_mat_create(w,h,k,c);
+  compute_stats(avg);
+  return avg;
+}
+
+ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
+    /*da capire come funziona il parametro k,
+    per il momento suppongo sia sempre k = 1
+    */
+    ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
+    int i, j, x, y;
+    int cx = w / 2;
+    int cy = h / 2;
+    float sum = 0.0;
+    for(i = 0; i < h; i++){
+        for(j = 0; j < w; j++){
+            float value;
+            x = i - cx;
+            y = j - cy;
+            value = (1/(2*PI*sigma*sigma))*exp(-(x*x+y*y)/(2*sigma*sigma));
+            sum += value;
+            set_val(gaussian, i, j, 0, value);
+        }
+    }
+    for(i = 0; i < h; i++){
+        for(j = 0; j < w; j++){
+            float value = get_val(gaussian, i, j, 0);
+            value /= sum;
+            set_val(gaussian, i, j, 0, value);
+        }
+    }
+
+    compute_stats(gaussian);
+    return gaussian;
+}
+
+
+void rescale(ip_mat * t, float new_max){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
+      }
+    }
+  }
+}
+
+void clamp(ip_mat * t, float low, float high){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        if (t->data[i][j][l] > high)
+          t->data[i][j][l] = 255.0;
+        if (t->data[i][j][l] < low)
+          t->data[i][j][l] = 0.0;
+      }
+    }
+  }
+}
 float get_normal_random(){
     float y1 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
     float y2 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
@@ -506,114 +616,4 @@ void ip_mat_show_stats(ip_mat * t){
         printf("\t Max: %f\n", t->stat[k].max);
         printf("\t Mean: %f\n", t->stat[k].mean);
     }
-}
-
-ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
-    /*da capire come funziona il parametro k,
-    per il momento suppongo sia sempre k = 1
-    */
-    ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
-    int i, j, x, y;
-    int cx = w / 2;
-    int cy = h / 2;
-    float sum = 0.0;
-    for(i = 0; i < h; i++){
-        for(j = 0; j < w; j++){
-            float value;
-            x = i - cx;
-            y = j - cy;
-            value = (1/(2*PI*sigma*sigma))*exp(-(x*x+y*y)/(2*sigma*sigma));
-            sum += value;
-            set_val(gaussian, i, j, 0, value);
-        }
-    }
-    for(i = 0; i < h; i++){
-        for(j = 0; j < w; j++){
-            float value = get_val(gaussian, i, j, 0);
-            value /= sum;
-            set_val(gaussian, i, j, 0, value);
-        }
-    }
-
-    compute_stats(gaussian);
-    return gaussian;
-}
-ip_mat * create_sharpen_filter(){
-  ip_mat *sharpen = ip_mat_create(3,3,1,1.0);
-  set_val(sharpen,0,0,0,0);
-  set_val(sharpen,0,2,0,0);
-  set_val(sharpen,2,2,0,0);
-  set_val(sharpen,2,0,0,0);
-  set_val(sharpen,0,1,0,-1);
-  set_val(sharpen,1,0,0,-1);
-  set_val(sharpen,1,2,0,-1);
-  set_val(sharpen,2,1,0,-1);
-  set_val(sharpen,1,1,0,5);
-  compute_stats(sharpen);
-  return sharpen;
-}
-
-ip_mat * create_edge_filter(){
-  ip_mat *edge = ip_mat_create(3,3,1,1.0);
-  set_val(edge,0,0,0,-1);
-  set_val(edge,0,1,0,-1);
-  set_val(edge,0,2,0,-1);
-  set_val(edge,1,0,0,-1);
-  set_val(edge,1,2,0,-1);
-  set_val(edge,2,0,0,-1);
-  set_val(edge,2,1,0,-1);
-  set_val(edge,2,2,0,-1);
-  set_val(edge,1,1,0,8);
-  compute_stats(edge);
-  return edge;
-}
-
-ip_mat * create_emboss_filter(){
-  ip_mat *emboss = ip_mat_create(3,3,1,1.0);
-  set_val(emboss,0,0,0,-2);
-  set_val(emboss,0,1,0,-1);
-  set_val(emboss,0,2,0,0);
-  set_val(emboss,1,0,0,-1);
-  set_val(emboss,1,1,0,1);
-  set_val(emboss,1,2,0,1);
-  set_val(emboss,2,0,0,0);
-  set_val(emboss,2,1,0,1);
-  set_val(emboss,2,2,0,2);
-  compute_stats(emboss);
-  return emboss;
-}
-
-ip_mat * create_average_filter(int w, int h, int k){
-  float c=1.0/(w*h);
-
-  ip_mat * avg = ip_mat_create(w,h,k,c);
-  compute_stats(avg);
-  return avg;
-}
-
-void rescale(ip_mat * t, float new_max){
-  int i, j, l;
-
-  for(i=0; i<t->h; i++){
-    for(j=0; j<t->w; j++){
-      for(l=0; l<t->k; l++){
-        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
-      }
-    }
-  }
-}
-
-void clamp(ip_mat * t, float low, float high){
-  int i, j, l;
-
-  for(i=0; i<t->h; i++){
-    for(j=0; j<t->w; j++){
-      for(l=0; l<t->k; l++){
-        if (t->data[i][j][l] > high)
-          t->data[i][j][l] = 255.0;
-        if (t->data[i][j][l] < low)
-          t->data[i][j][l] = 0.0;
-      }
-    }
-  }
 }
