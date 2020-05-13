@@ -62,7 +62,7 @@ float get_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k){
     if(i<a->h && j<a->w &&k<a->k){  /* j>=0 and k>=0 and i>=0 is non sense*/
         return a->data[i][j][k];
     }else{
-        printf("Errore get_val!!!");
+        printf("Errore get_val!!!\n");
         exit(1);
     }
 }
@@ -72,7 +72,7 @@ void set_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k, float v){
     if(i<a->h && j<a->w &&k<a->k){
         a->data[i][j][k]=v;
     }else{
-        printf("Errore set_val!!!");
+        printf("Errore set_val!!!\n");
         exit(1);
     }
 }
@@ -426,32 +426,7 @@ ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che i
 
 }
 
-void rescale(ip_mat * t, float new_max){
-  int i, j, l;
 
-  for(i=0; i<t->h; i++){
-    for(j=0; j<t->w; j++){
-      for(l=0; l<t->k; l++){
-        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
-      }
-    }
-  }
-}
-
-void clamp(ip_mat * t, float low, float high){
-  int i, j, l;
-
-  for(i=0; i<t->h; i++){
-    for(j=0; j<t->w; j++){
-      for(l=0; l<t->k; l++){
-        if (t->data[i][j][l] > high)
-          t->data[i][j][l] = 255.0;
-        if (t->data[i][j][l] < low)
-          t->data[i][j][l] = 0.0;
-      }
-    }
-  }
-}
 
 float get_normal_random(){
     float y1 = ( (float)(rand()) + 1. )/( (float)(RAND_MAX) + 1. );
@@ -562,4 +537,83 @@ ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
 
     compute_stats(gaussian);
     return gaussian;
+}
+ip_mat * create_sharpen_filter(){
+  ip_mat *sharpen = ip_mat_create(3,3,1,1.0);
+  set_val(sharpen,0,0,0,0);
+  set_val(sharpen,0,2,0,0);
+  set_val(sharpen,2,2,0,0);
+  set_val(sharpen,2,0,0,0);
+  set_val(sharpen,0,1,0,-1);
+  set_val(sharpen,1,0,0,-1);
+  set_val(sharpen,1,2,0,-1);
+  set_val(sharpen,2,1,0,-1);
+  set_val(sharpen,1,1,0,5);
+  compute_stats(sharpen);
+  return sharpen;
+}
+
+ip_mat * create_edge_filter(){
+  ip_mat *edge = ip_mat_create(3,3,1,1.0);
+  set_val(edge,0,0,0,-1);
+  set_val(edge,0,1,0,-1);
+  set_val(edge,0,2,0,-1);
+  set_val(edge,1,0,0,-1);
+  set_val(edge,1,2,0,-1);
+  set_val(edge,2,0,0,-1);
+  set_val(edge,2,1,0,-1);
+  set_val(edge,2,2,0,-1);
+  set_val(edge,1,1,0,8);
+  compute_stats(edge);
+  return edge;
+}
+
+ip_mat * create_emboss_filter(){
+  ip_mat *emboss = ip_mat_create(3,3,1,1.0);
+  set_val(emboss,0,0,0,-2);
+  set_val(emboss,0,1,0,-1);
+  set_val(emboss,0,2,0,0);
+  set_val(emboss,1,0,0,-1);
+  set_val(emboss,1,1,0,1);
+  set_val(emboss,1,2,0,1);
+  set_val(emboss,2,0,0,0);
+  set_val(emboss,2,1,0,1);
+  set_val(emboss,2,2,0,2);
+  compute_stats(emboss);
+  return emboss;
+}
+
+ip_mat * create_average_filter(int w, int h, int k){
+  float c=1.0/(w*h);
+
+  ip_mat * avg = ip_mat_create(w,h,k,c);
+  compute_stats(avg);
+  return avg;
+}
+
+void rescale(ip_mat * t, float new_max){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
+      }
+    }
+  }
+}
+
+void clamp(ip_mat * t, float low, float high){
+  int i, j, l;
+
+  for(i=0; i<t->h; i++){
+    for(j=0; j<t->w; j++){
+      for(l=0; l<t->k; l++){
+        if (t->data[i][j][l] > high)
+          t->data[i][j][l] = 255.0;
+        if (t->data[i][j][l] < low)
+          t->data[i][j][l] = 0.0;
+      }
+    }
+  }
 }
