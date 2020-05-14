@@ -443,16 +443,8 @@ ip_mat * create_sharpen_filter(){
 }
 
 ip_mat * create_edge_filter(){
-  ip_mat *edge = ip_mat_create(3,3,1,1.0);
-  set_val(edge,0,0,0,-1);
-  set_val(edge,0,1,0,-1);
-  set_val(edge,0,2,0,-1);
-  set_val(edge,1,0,0,-1);
-  set_val(edge,1,2,0,-1);
-  set_val(edge,2,0,0,-1);
-  set_val(edge,2,1,0,-1);
-  set_val(edge,2,2,0,-1);
-  set_val(edge,1,1,0,8);
+  ip_mat *edge = ip_mat_create(3,3,1,-1.0);
+  set_val(edge,1,1,0,8.0);
   compute_stats(edge);
   return edge;
 }
