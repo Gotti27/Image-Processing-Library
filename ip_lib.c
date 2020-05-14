@@ -428,11 +428,7 @@ ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che i
 
 
 ip_mat * create_sharpen_filter(){
-  ip_mat *sharpen = ip_mat_create(3,3,1,1.0);
-  set_val(sharpen,0,0,0,0);
-  set_val(sharpen,0,2,0,0);
-  set_val(sharpen,2,2,0,0);
-  set_val(sharpen,2,0,0,0);
+  ip_mat *sharpen = ip_mat_create(3,3,1,0.0);
   set_val(sharpen,0,1,0,-1);
   set_val(sharpen,1,0,0,-1);
   set_val(sharpen,1,2,0,-1);
@@ -451,15 +447,12 @@ ip_mat * create_edge_filter(){
 
 ip_mat * create_emboss_filter(){
   ip_mat *emboss = ip_mat_create(3,3,1,1.0);
-  set_val(emboss,0,0,0,-2);
-  set_val(emboss,0,1,0,-1);
-  set_val(emboss,0,2,0,0);
-  set_val(emboss,1,0,0,-1);
-  set_val(emboss,1,1,0,1);
-  set_val(emboss,1,2,0,1);
-  set_val(emboss,2,0,0,0);
-  set_val(emboss,2,1,0,1);
-  set_val(emboss,2,2,0,2);
+  set_val(emboss,0,0,0,-2.0);
+  set_val(emboss,0,1,0,-1.0);
+  set_val(emboss,0,2,0,0.0);
+  set_val(emboss,1,0,0,-1.0);
+  set_val(emboss,2,0,0,0.0);
+  set_val(emboss,2,2,0,2.0);
   compute_stats(emboss);
   return emboss;
 }
