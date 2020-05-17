@@ -289,19 +289,23 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
 }
 
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    int i, j, l;
+    unsigned int i, j, l;
     ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
-            float mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 3;
+          float mean = 0;
             for(l = 0; l < in->k; l++){
-                bw->data[i][j][l] = mean;
+              mean += in->data[i][j][l] / in->k;
+            }
+            for(l = 0; l < in->k; l++){
+              bw->data[i][j][l] = mean;
             }
         }
     }
     compute_stats(bw);
     return bw;
 }
+
 
 /*
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
