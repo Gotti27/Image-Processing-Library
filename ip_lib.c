@@ -461,7 +461,7 @@ ip_mat * create_emboss_filter(){
   return emboss;
 }
 
-ip_mat * create_average_filter(int w, int h, int k){
+ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
   float c=1.0/(w*h);
 
   ip_mat * avg = ip_mat_create(w,h,k,c);
