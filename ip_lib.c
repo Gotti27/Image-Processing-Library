@@ -412,19 +412,17 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
 
 ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che il padding è >0*/
 {
-  ip_mat *padd, *temp, *temp1;
-  padd = ip_mat_create (pad_h,a->w,a->k,0);
-  temp = ip_mat_concat(padd,a,0);
-  temp1 = ip_mat_concat(temp,padd,0);
-  ip_mat_free(padd);
-  ip_mat_free(temp);
-  padd = ip_mat_create (temp1->h,pad_w,a->k,0);
-  temp = ip_mat_concat(padd,temp1,1);
-  ip_mat_free(temp1);
-  temp1 = ip_mat_concat(temp,padd,1);
-  ip_mat_free(temp);
-  ip_mat_free(padd);
+  ip_mat *padd;
+  int i,j,l;
+  padd = ip_mat_create (a->h+(pad_h*2),a->w+(pad_w*2),a->k,0);
 
+    for (i = pad_h; i < padd->h-pad_h; i++) {
+        for(j = pad_w; j < padd->w-pad_h; j++){
+            for(l = 0; l < padd->k; l++){
+                padd->data[i][j][l] = a->data[i][j][l];
+            }
+        }
+    }
   return temp1;
 
 }
