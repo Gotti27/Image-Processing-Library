@@ -466,14 +466,15 @@ ip_mat * create_average_filter(int w, int h, int k){
 }
 
 ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, float sigma){
-    /*da capire come funziona il parametro k,
-    per il momento suppongo sia sempre k = 1
+    /*per il momento suppongo sia sempre k = 1
+    da ricontrollare prima della consegna    
     */
     ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
     int i, j, x, y;
     int cx = w / 2;
     int cy = h / 2;
     float sum = 0.0;
+    k = 1;
     for(i = 0; i < h; i++){
         for(j = 0; j < w; j++){
             float value;
