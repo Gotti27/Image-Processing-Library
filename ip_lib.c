@@ -465,7 +465,7 @@ ip_mat * create_average_filter(int w, int h, int k){
   return avg;
 }
 
-ip_mat * create_gaussian_filter(int w, int h, int k, float sigma){
+ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, float sigma){
     /*da capire come funziona il parametro k,
     per il momento suppongo sia sempre k = 1
     */
