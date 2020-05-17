@@ -289,19 +289,23 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
 }
 
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
-    int i, j, l;
+    unsigned int i, j, l;
     ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
-            float mean = (in->data[i][j][0] + in->data[i][j][1] + in->data[i][j][2]) / 3;
+          float mean = 0;
             for(l = 0; l < in->k; l++){
-                bw->data[i][j][l] = mean;
+              mean += in->data[i][j][l] / in->k;
+            }
+            for(l = 0; l < in->k; l++){
+              bw->data[i][j][l] = mean;
             }
         }
     }
     compute_stats(bw);
     return bw;
 }
+
 
 /*
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
@@ -360,7 +364,6 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
 
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
  ip_mat * lux = ip_mat_add_scalar( a,  bright);
- clamp(lux,0.0,255.0);
  compute_stats (lux);
  return lux;
 }
@@ -457,7 +460,7 @@ ip_mat * create_emboss_filter(){
   return emboss;
 }
 
-ip_mat * create_average_filter(int w, int h, int k){
+ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
   float c=1.0/(w*h);
 
   ip_mat * avg = ip_mat_create(w,h,k,c);
@@ -517,9 +520,9 @@ void clamp(ip_mat * t, float low, float high){
     for(j=0; j<t->w; j++){
       for(l=0; l<t->k; l++){
         if (t->data[i][j][l] > high)
-          t->data[i][j][l] = 255.0;
+          t->data[i][j][l] = high
         if (t->data[i][j][l] < low)
-          t->data[i][j][l] = 0.0;
+          t->data[i][j][l] = low;
       }
     }
   }
