@@ -364,7 +364,6 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due
 
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
  ip_mat * lux = ip_mat_add_scalar( a,  bright);
- clamp(lux,0.0,255.0);
  compute_stats (lux);
  return lux;
 }
@@ -461,7 +460,7 @@ ip_mat * create_emboss_filter(){
   return emboss;
 }
 
-ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
+ip_mat * create_average_filter(int w, int h, int k){
   float c=1.0/(w*h);
 
   ip_mat * avg = ip_mat_create(w,h,k,c);
@@ -520,9 +519,9 @@ void clamp(ip_mat * t, float low, float high){
     for(j=0; j<t->w; j++){
       for(l=0; l<t->k; l++){
         if (t->data[i][j][l] > high)
-          t->data[i][j][l] = 255.0;
+          t->data[i][j][l] = high
         if (t->data[i][j][l] < low)
-          t->data[i][j][l] = 0.0;
+          t->data[i][j][l] = low;
       }
     }
   }
