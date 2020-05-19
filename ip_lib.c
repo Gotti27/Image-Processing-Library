@@ -466,16 +466,15 @@ ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
   return avg;
 }
 
-ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, float sigma){
-    /*per il momento suppongo sia sempre k = 1
-    da ricontrollare prima della consegna    
+ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, float sigma){
+    /*da ricontrollare prima della consegna
+    si creano k canali uguali
     */
     ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
-    int i, j, x, y;
+    int i, j, l, x, y;
     int cx = w / 2;
     int cy = h / 2;
     float sum = 0.0;
-    k = 1;
     for(i = 0; i < h; i++){
         for(j = 0; j < w; j++){
             float value;
@@ -490,14 +489,15 @@ ip_mat * create_gaussian_filter(unsigned int w, unsigned int h, unsigned int k, 
         for(j = 0; j < w; j++){
             float value = get_val(gaussian, i, j, 0);
             value /= sum;
-            set_val(gaussian, i, j, 0, value);
+            for(l = 0; l < k; l++){
+                set_val(gaussian, i, j, l, value);
+            }
         }
     }
 
     compute_stats(gaussian);
     return gaussian;
 }
-
 
 void rescale(ip_mat * t, float new_max){
   int i, j, l;
