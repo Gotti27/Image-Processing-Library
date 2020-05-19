@@ -12,6 +12,10 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
   ip_mat *nuova;
   stats * st;
   float ***p3;
+  if (h<=0 || w<=0 || k<= 0) {
+    printf("Dimensioni non valide\n");
+    exit(1);
+  }
 
   nuova = malloc(sizeof(ip_mat));
   nuova->w = w;
