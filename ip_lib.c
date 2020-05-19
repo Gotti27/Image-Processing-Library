@@ -369,19 +369,22 @@ ip_mat * ip_mat_brighten(ip_mat * a, float bright){
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
-  if (amount < 0 || amount > 255){
-   exit(1);
-  }else{
-
-  ip_mat * b = ip_mat_copy(a);
-  int mean = ((&a->stat[0])->mean + (&a->stat[1])->mean + (&a->stat[2])->mean ) /3;
-
-  ip_mat_init_random(b, mean, amount);
-  b = ip_mat_sum(a, b);
-  compute_stats(b);
-
-  return b;
-  }
+    if (amount < 0 || amount > 255){
+        exit(1);
+    }
+    else{
+        int i, j, l;
+        ip_mat * b = ip_mat_copy(a);
+        for(i = 0; i < a->h; i++){
+            for(j = 0; j < a->w; j++){
+                for(l = 0; l < a->k; l++){
+                    b->data[i][j][l] += get_normal_random(0, 2*amount*amount);
+                }
+            }
+        }
+        compute_stats(b);
+        return b;
+    }
 }
 
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
