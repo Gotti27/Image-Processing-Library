@@ -382,7 +382,7 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
         for(i = 0; i < a->h; i++){
             for(j = 0; j < a->w; j++){
                 for(l = 0; l < a->k; l++){
-                    b->data[i][j][l] += get_normal_random(0, 2*amount*amount);
+                    b->data[i][j][l] += get_normal_random(0, 2*amount);
                 }
             }
         }
