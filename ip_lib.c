@@ -394,10 +394,22 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   int deltaW, deltaH;
   ip_mat * filtered;
-  int i, j, I, J, L;
+  ip_mat * filter;
+  unsigned int i, j, I, J, L;
 
   deltaW = (f->w -1) / 2;
   deltaH = (f->h -1) / 2;
+
+  if( a->k % f->k == 0 ){
+    filter = ip_mat_copy(f);
+    while(a->k > filter->k){
+      filter = ip_mat_concat(filter, f, 2);
+    }
+  }
+  else{
+    printf("Incompatible dimensions for filter and photo\n");
+    exit(1);
+  }
 
   filtered = ip_mat_create( a->h - deltaH * 2, a->w - deltaW * 2, a->k, 0);
 
@@ -405,15 +417,16 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   	for( J = deltaW; J < filtered->w - deltaW; J++ ){
   	  for( L = 0; L < filtered->k; L++ ){
 
-  	  	for( i = 0; i < f->h; i++ ){
-  	  	  for( j= 0; j < f-> w; j++ ){
-  	  	  	filtered->data[I][J][L] += f->data[i][j][0] * a->data[I-deltaH+i][J-deltaW+j][L];
+  	  	for( i = 0; i < filter->h; i++ ){
+  	  	  for( j= 0; j < filter-> w; j++ ){
+  	  	  	filtered->data[I][J][L] += filter->data[i][j][L] * a->data[I-deltaH+i][J-deltaW+j][L];
   	  	  }
   	  	}
 
   	  }
   	}
   }
+  ip_mat_free(filter);
   return filtered;
 }
 
