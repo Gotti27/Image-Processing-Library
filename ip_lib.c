@@ -372,7 +372,7 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   deltaW = (f->w -1) / 2;
   deltaH = (f->h -1) / 2;
 
-  if( a->k % f->k == 0 ){
+  if( a->k % f->k == 0 && a->k >= f->k){
     filter = ip_mat_copy(f);
     while(a->k > filter->k){
       filter = ip_mat_concat(filter, f, 2);
@@ -399,6 +399,7 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   	}
   }
   ip_mat_free(filter);
+  compute_stats(filtered);
   return filtered;
 }
 
