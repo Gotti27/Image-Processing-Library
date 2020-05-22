@@ -24,9 +24,9 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
 
   st = malloc(k * sizeof(stats));
   for ( i = 0; i < k; i++){
-    (&st[i])->min =  v;
-    (&st[i])->max =  v;
-    (&st[i])->mean = v;
+    st[i].min =  v;
+    st[i].max =  v;
+    st[i].mean = v;
   }
   nuova->stat = st;
 
@@ -103,9 +103,9 @@ void compute_stats(ip_mat * t){
       }
     }
 
-    (&t->stat[l])->min = min;
-    (&t->stat[l])->max = max;
-    (&t->stat[l])->mean = mean;
+    t->stat[l].min = min;
+    t->stat[l].max = max;
+    t->stat[l].mean = mean;
   }
 }
 
@@ -499,7 +499,7 @@ void rescale(ip_mat * t, float new_max){
   for(i=0; i<t->h; i++){
     for(j=0; j<t->w; j++){
       for(l=0; l<t->k; l++){
-        t->data[i][j][l] = (t->data[i][j][l] - (&t->stat[l])->min)/((&t->stat[l])->max - (&t->stat[l])->min) * new_max;
+        t->data[i][j][l] = (t->data[i][j][l] - t->stat[l].min)/(t->stat[l].max - t->stat[l].min) * new_max;
       }
     }
   }
