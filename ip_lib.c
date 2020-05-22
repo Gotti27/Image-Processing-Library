@@ -47,7 +47,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
 
 
 void ip_mat_free(ip_mat * t){
-  int i,j;
+  unsigned int i,j;
   free(t->stat);
 
   for (i = 0; i< t->h; i++){
@@ -111,11 +111,11 @@ void compute_stats(ip_mat * t){
 
 
 void ip_mat_init_random(ip_mat * t, float mean, float var){
-  int i, j, l;
+  unsigned int i, j, l;
   for (i = 0; i < t->h; i++){
     for (j = 0; j < t->w; j++){
       for (l = 0; l < t->k; l++){
-        t->data[i][j][l] = var*get_normal_random() + mean;
+        t->data[i][j][l] = get_normal_random(mean, var);
       }
     }
   }
@@ -124,7 +124,7 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
 
 
 ip_mat * ip_mat_copy(ip_mat * in){
-    int i,j,l;
+    unsigned int i,j,l;
     ip_mat * copia;
 
     copia = ip_mat_create(in->h, in->w, in->k, 1.0);
@@ -142,14 +142,18 @@ ip_mat * ip_mat_copy(ip_mat * in){
 
 
 ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end, unsigned int col_start, unsigned int col_end){
-  int i, j, l;
-  int rig=row_end-row_start;
-  int col= col_end-col_start;
-  ip_mat * nuova =  ip_mat_create(rig, col, t->k, 0.0);
+  unsigned int i, j, l;
+  unsigned int row = row_end-row_start;
+  unsigned int col = col_end-col_start;
+  ip_mat * nuova;
 
-  for(i=0; i<rig; i++){
-    for(j=0; j<col; j++){
-      for(l=0; l<t->k; l++){
+  if(row <= 0 || col <= 0){exit(1);}
+
+  nuova =  ip_mat_create(row, col, t->k, 0.0);
+
+  for(i = 0; i < row; i++){
+    for(j = 0; j < col; j++){
+      for(l = 0; l < t->k; l++){
         nuova->data[i][j][l] = t->data[i+row_start][j+col_start][l];
       }
     }
@@ -163,7 +167,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
 ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
   ip_mat * out;
   unsigned int i,j,l;
-  int di=0, dj=0, dl=0;
+  unsigned int di=0, dj=0, dl=0;
 
   if (dimensione == 0 && a->w == b-> w && a->k == b->k){
     out = ip_mat_create((a->h + b->h), a->w,a->k,  0);
@@ -199,7 +203,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
 
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
   if (a->w == b->w && a->h == b->h && a->k == b->k) {
-      int i, j, l;
+      unsigned int i, j, l;
       ip_mat * sum = ip_mat_copy(a);
 
       for (i = 0; i < a->h; i++) {
@@ -220,7 +224,7 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     if (a->w == b->w && a->h == b->h && a->k == b->k) {
-        int i, j, l;
+        unsigned int i, j, l;
         ip_mat * sub = ip_mat_copy(a);
 
         for (i = 0; i < a->h; i++) {
@@ -240,7 +244,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 
 
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
-  int i, j, l;
+  unsigned int i, j, l;
   ip_mat * mus = ip_mat_copy(a);
 
   for( i=0; i<a->h; i++){
@@ -257,7 +261,7 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
 
 
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
-  int i, j, l;
+  unsigned int i, j, l;
   ip_mat * ads = ip_mat_copy(a);
 
   for( i=0; i<a->h; i++){
@@ -274,7 +278,7 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
 
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
     if(a->w == b->w && a->h == b->h && a->k == b->k){
-        int i, j, l;
+        unsigned int i, j, l;
         ip_mat * mean = ip_mat_copy( a );
 
         for (i = 0; i < a->h; i++) {
@@ -311,20 +315,19 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
 }
 
 
-/*
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
-  ip mat * blended;
-  if(a->h == b->h && a->w == b->w && a->k == b->k && alpha >=0 && alpha <=1)
-    {
+  ip_mat * blended;
+  if(a->h == b->h && a->w == b->w && a->k == b->k && alpha >=0 && alpha <=1){
       unsigned int i,j,l;
       blended = ip_mat_create(a->h,a->w,a->k,0);
       for (i = 0; i < blended->h; i++) {
-            for(j = 0; j < blended->w; j++){
-                for(l = 0; l < blended->k; l++){
-                    blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
-                }
-            }
+        for(j = 0; j < blended->w; j++){
+          for(l = 0; l < blended->k; l++){
+            blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]);
+          }
         }
+      }
+      return blended;
     }
     else
     {
@@ -333,38 +336,7 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
 
     }
 }
-*/
-ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) { /* V2.0 ---- da due immagini ne da un'altra creata dalle dimensioni minori*/
-  ip_mat * blended;
-  if(alpha >=0 && alpha <=1)
-    {
-      unsigned int i,j,l,h,w,k;
-      h = a->h;
-      w = a->w;
-      k = a->k;
-      blended = ip_mat_create(a->h,a->w,a->k,0);
-      for (i = 0; i < blended->h; i++) {
-            for(j = 0; j < blended->w; j++){
-                for(l = 0; l < blended->k; l++){
-                  if (i < h && j< w && l < k) {
-                    blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]) ;
-                  }
-                  else {
-                    blended->data[i][j][l] = a->data[i][j][l];
-                  }
-                }
-            }
-        }
-    }
-    else
-    {
-      printf(" alpha di dimensione errata\n");
-      exit(1);
 
-    }
-    compute_stats(blended);
-    return blended;
-}
 
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
  ip_mat * lux = ip_mat_add_scalar( a,  bright);
@@ -377,7 +349,7 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
         exit(1);
     }
     else{
-        int i, j, l;
+        unsigned int i, j, l;
         ip_mat * b = ip_mat_copy(a);
         for(i = 0; i < a->h; i++){
             for(j = 0; j < a->w; j++){
@@ -430,10 +402,10 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   return filtered;
 }
 
-ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che il padding è >0*/
+ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w)
 {
   ip_mat *padd;
-  int i,j,l;
+  unsigned int i,j,l;
   padd = ip_mat_create (a->h+(pad_h*2),a->w+(pad_w*2),a->k,0);
 
     for (i = pad_h; i < padd->h-pad_h; i++) {
@@ -443,7 +415,7 @@ ip_mat * ip_mat_padding(ip_mat * a, int pad_h, int pad_w)/*do per scontato che i
             }
         }
     }
-  return temp1;
+  return padd;
 
 }
 
@@ -491,7 +463,8 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
     si creano k canali uguali
     */
     ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
-    int i, j, l, x, y;
+    unsigned int i, j, l;
+    int x, y;
     int cx = w / 2;
     int cy = h / 2;
     float sum = 0.0;
@@ -520,7 +493,7 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
 }
 
 void rescale(ip_mat * t, float new_max){
-  int i, j, l;
+  unsigned int i, j, l;
 
   for(i=0; i<t->h; i++){
     for(j=0; j<t->w; j++){
@@ -532,13 +505,13 @@ void rescale(ip_mat * t, float new_max){
 }
 
 void clamp(ip_mat * t, float low, float high){
-  int i, j, l;
+  unsigned int i, j, l;
 
   for(i=0; i<t->h; i++){
     for(j=0; j<t->w; j++){
       for(l=0; l<t->k; l++){
         if (t->data[i][j][l] > high)
-          t->data[i][j][l] = high
+          t->data[i][j][l] = high;
         if (t->data[i][j][l] < low)
           t->data[i][j][l] = low;
       }
