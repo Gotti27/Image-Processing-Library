@@ -30,6 +30,7 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
   }
   nuova->stat = st;
 
+
   p3 = malloc (h * sizeof(float**));
   for ( i = 0; i < h; i++){
     p3[i] =  malloc (w * sizeof(float*));
@@ -48,17 +49,18 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
 
 void ip_mat_free(ip_mat * t){
   unsigned int i,j;
-  free(t->stat);
+  if(t){
+    free(t->stat);
 
-  for (i = 0; i< t->h; i++){
-    for (j = 0; j< t->w; j++){
-      free(t->data[i][j]);
+    for (i = 0; i< t->h; i++){
+      for (j = 0; j< t->w; j++){
+        free(t->data[i][j]);
+      }
+      free(t->data[i]);
     }
-    free(t->data[i]);
+    free(t->data);
+    free(t);
   }
-  free(t->data);
-
-  free(t);
 }
 
 
@@ -86,6 +88,11 @@ void compute_stats(ip_mat * t){
   unsigned int i, j, l;
   float min,max,mean;
 
+  if( !t ){
+    printf("Matrice non valida");
+    exit(1);
+  }
+
   for (l = 0; l < t->k; l++){
     min =  t->data[0][0][l];
     max =  t->data[0][0][l];
@@ -112,6 +119,11 @@ void compute_stats(ip_mat * t){
 
 void ip_mat_init_random(ip_mat * t, float mean, float var){
   unsigned int i, j, l;
+  if( !t ){
+    printf("Matrice non valida");
+    exit(1);
+  }
+
   for (i = 0; i < t->h; i++){
     for (j = 0; j < t->w; j++){
       for (l = 0; l < t->k; l++){
@@ -126,6 +138,10 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
 ip_mat * ip_mat_copy(ip_mat * in){
     unsigned int i,j,l;
     ip_mat * copia;
+    if( !in ){
+      printf("Matrice non valida\n");
+      exit(1);
+    }
 
     copia = ip_mat_create(in->h, in->w, in->k, 1.0);
     for (i = 0; i < in->h; i++) {
@@ -147,7 +163,10 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
   unsigned int col = col_end-col_start;
   ip_mat * nuova;
 
-  if(row <= 0 || col <= 0){exit(1);}
+  if(row <= 0 || col <= 0 || !t ||row_end > t->h || col_end > t->w ){
+    printf("Matrice non valida o valori errati");
+    exit(1);
+  }
 
   nuova =  ip_mat_create(row, col, t->k, 0.0);
 
@@ -182,6 +201,7 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
     dl = a->k;
   }
   else{
+    printf("Almeno due dimensioni su tre non coincidono\n");
     exit(1);
   }
 
@@ -202,50 +222,58 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
 }
 
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
-  if (a->w == b->w && a->h == b->h && a->k == b->k) {
-      unsigned int i, j, l;
-      ip_mat * sum = ip_mat_copy(a);
+  unsigned int i, j, l;
+  ip_mat * sum = ip_mat_copy(a);
 
-      for (i = 0; i < a->h; i++) {
-          for(j = 0; j < a->w; j++){
-              for(l = 0; l < a->k; l++){
-                  sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
-              }
-          }
-      }
-      compute_stats(sum);
-      return sum;
-    }
-  else{
+  if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
+    printf("Matrice nulla o dimensioni non coincidenti\n");
+    ip_mat_free(sum);
     exit(1);
   }
+
+  for (i = 0; i < a->h; i++) {
+    for(j = 0; j < a->w; j++){
+      for(l = 0; l < a->k; l++){
+        sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
+      }
+    }
+  }
+  compute_stats(sum);
+  return sum;
 }
 
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
-    if (a->w == b->w && a->h == b->h && a->k == b->k) {
-        unsigned int i, j, l;
-        ip_mat * sub = ip_mat_copy(a);
+    unsigned int i, j, l;
+    ip_mat * sub = ip_mat_copy(a);
 
-        for (i = 0; i < a->h; i++) {
-            for(j = 0; j < a->w; j++){
-                for(l = 0; l < a->k; l++){
-                    sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
-                }
-            }
-        }
-        compute_stats(sub);
-        return sub;
-      }
-    else{
+    if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
+      printf("Matrice nulla o dimensioni non coincidenti\n");
+      ip_mat_free(sub);
       exit(1);
     }
+
+    for (i = 0; i < a->h; i++) {
+        for(j = 0; j < a->w; j++){
+            for(l = 0; l < a->k; l++){
+                sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
+            }
+        }
+    }
+    compute_stats(sub);
+    return sub;
 }
 
 
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
   unsigned int i, j, l;
   ip_mat * mus = ip_mat_copy(a);
+
+  if (!a){
+    printf("Matrice non valida\n");
+    ip_mat_free(mus);
+    exit(1);
+  }
 
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
@@ -264,6 +292,12 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
   unsigned int i, j, l;
   ip_mat * ads = ip_mat_copy(a);
 
+  if (!a){
+    printf("Matrice non valida\n");
+    ip_mat_free(ads);
+    exit(1);
+  }
+
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
       for( l=0; l<a->k; l++){
@@ -277,28 +311,36 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
 }
 
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
-    if(a->w == b->w && a->h == b->h && a->k == b->k){
-        unsigned int i, j, l;
-        ip_mat * mean = ip_mat_copy( a );
+  unsigned int i, j, l;
+  ip_mat * mean = ip_mat_copy( a );
 
-        for (i = 0; i < a->h; i++) {
-            for(j = 0; j < a->w; j++){
-                for(l = 0; l < a->k; l++){
-                    mean->data[i][j][l] = (a->data[i][j][l] + b->data[i][j][l]) / 2;
-                }
-            }
-        }
-        compute_stats(mean);
-        return mean;
-    }
-    else{
-        exit(1);
-    }
+  if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
+    printf("Matrice nulla o dimensioni non coincidenti\n");
+    ip_mat_free(mean);
+    exit(1);
+  }
+
+  for (i = 0; i < a->h; i++) {
+      for(j = 0; j < a->w; j++){
+          for(l = 0; l < a->k; l++){
+              mean->data[i][j][l] = (a->data[i][j][l] + b->data[i][j][l]) / 2;
+          }
+      }
+  }
+  compute_stats(mean);
+  return mean;
 }
 
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     unsigned int i, j, l;
     ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
+
+    if( !in ){
+      printf("Matrice non valida");
+      ip_mat_free(bw);
+      exit(1);
+    }
+
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
           float mean = 0;
@@ -317,50 +359,57 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
 
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
   ip_mat * blended;
-  if(a->h == b->h && a->w == b->w && a->k == b->k && alpha >=0 && alpha <=1){
-      unsigned int i,j,l;
-      blended = ip_mat_create(a->h,a->w,a->k,0);
-      for (i = 0; i < blended->h; i++) {
-        for(j = 0; j < blended->w; j++){
-          for(l = 0; l < blended->k; l++){
-            blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]);
-          }
-        }
-      }
-      return blended;
-    }
-    else
-    {
-      printf("immagini di dimensione diversa o alpha di dimensione errata\n");
-      exit(1);
+  unsigned int i,j,l;
 
+  if(!a || !b || a->h != b->h || a->w != b->w || a->k != b->k || alpha < 0 || alpha > 1){
+    printf("Immagini di dimensione diversa o alpha di dimensione errata\n");
+    exit(1);
+  }
+
+  blended = ip_mat_create(a->h,a->w,a->k,0);
+  for (i = 0; i < blended->h; i++) {
+    for(j = 0; j < blended->w; j++){
+      for(l = 0; l < blended->k; l++){
+        blended->data[i][j][l] =  (alpha *a->data[i][j][l]) + ((1 - alpha) * b->data[i][j][l]);
+      }
     }
+  }
+  return blended;
 }
 
 
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
- ip_mat * lux = ip_mat_add_scalar( a,  bright);
+ ip_mat * lux = ip_mat_add_scalar(a,  bright);
+
+ if(!a){
+   printf("Matrice non nulla");
+   ip_mat_free(lux);
+   exit(1);
+ }
+
  compute_stats (lux);
  return lux;
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
-    if (amount < 0 || amount > 255){
-        exit(1);
+    unsigned int i, j, l;
+    ip_mat * b = ip_mat_copy(a);
+
+    if (!a || amount < 0 || amount > 255){
+      printf("Amount non compreso tra 0 e 255 o matrice nulla");
+      ip_mat_free(b);
+      exit(1);
     }
-    else{
-        unsigned int i, j, l;
-        ip_mat * b = ip_mat_copy(a);
-        for(i = 0; i < a->h; i++){
-            for(j = 0; j < a->w; j++){
-                for(l = 0; l < a->k; l++){
-                    b->data[i][j][l] += get_normal_random(0, 2*amount);
-                }
-            }
+
+    for(i = 0; i < a->h; i++){
+      for(j = 0; j < a->w; j++){
+        for(l = 0; l < a->k; l++){
+          b->data[i][j][l] += get_normal_random(0, 2*amount);
         }
-        compute_stats(b);
-        return b;
+      }
     }
+    compute_stats(b);
+    return b;
 }
 
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
@@ -372,14 +421,14 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   deltaW = (f->w -1) / 2;
   deltaH = (f->h -1) / 2;
 
-  if( a->k % f->k == 0 && a->k >= f->k){
+  if( a->k % f->k == 0 && a && f){
     filter = ip_mat_copy(f);
     while(a->k > filter->k){
       filter = ip_mat_concat(filter, f, 2);
     }
   }
   else{
-    printf("Incompatible dimensions for filter and photo\n");
+    printf("Dimensioni filtro/foto non compatibili o matrie nuulla\n");
     exit(1);
   }
 
@@ -399,14 +448,18 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   	}
   }
   ip_mat_free(filter);
-  compute_stats(filtered);
   return filtered;
 }
 
-ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w)
-{
+ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
   ip_mat *padd;
   unsigned int i,j,l;
+
+  if (!a){
+    printf("Matrice non valida");
+    exit(1);
+  }
+
   padd = ip_mat_create (a->h+(pad_h*2),a->w+(pad_w*2),a->k,0);
 
     for (i = pad_h; i < padd->h-pad_h; i++) {
@@ -463,31 +516,25 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
     /*da ricontrollare prima della consegna
     si creano k canali uguali
     */
-    ip_mat * gaussian = ip_mat_create(w, h, k, 1.0);
+    ip_mat * gaussian = ip_mat_create(h, w, k, 1.0);
     unsigned int i, j, l;
     int x, y;
-    int cx = w / 2;
-    int cy = h / 2;
+    int cx = (w-1) / 2;
+    int cy = (h-1) / 2;
     float sum = 0.0;
     for(i = 0; i < h; i++){
         for(j = 0; j < w; j++){
             float value;
-            x = i - cx;
-            y = j - cy;
+            y = i - cy;
+            x = j - cx;
             value = (1/(2*PI*sigma*sigma))*exp(-(x*x+y*y)/(2*sigma*sigma));
             sum += value;
-            set_val(gaussian, i, j, 0, value);
-        }
-    }
-    for(i = 0; i < h; i++){
-        for(j = 0; j < w; j++){
-            float value = get_val(gaussian, i, j, 0);
-            value /= sum;
             for(l = 0; l < k; l++){
-                set_val(gaussian, i, j, l, value);
+              set_val(gaussian, i, j, l, value);
             }
         }
     }
+    gaussian = ip_mat_mul_scalar(gaussian, 1/sum);
 
     compute_stats(gaussian);
     return gaussian;
@@ -495,6 +542,11 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
 
 void rescale(ip_mat * t, float new_max){
   unsigned int i, j, l;
+
+  if(!t){
+    printf("Matrice non valida");
+    exit(1);
+  }
 
   for(i=0; i<t->h; i++){
     for(j=0; j<t->w; j++){
@@ -507,6 +559,11 @@ void rescale(ip_mat * t, float new_max){
 
 void clamp(ip_mat * t, float low, float high){
   unsigned int i, j, l;
+
+  if(!t){
+    printf("Matrice non valida");
+    exit(1);
+  }
 
   for(i=0; i<t->h; i++){
     for(j=0; j<t->w; j++){
