@@ -527,7 +527,7 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
             float value;
             y = i - cy;
             x = j - cx;
-            value = (1/(2*PI*sigma*sigma))*exp(-(x*x+y*y)/(2*sigma*sigma));
+            value = (1.0/(2.0*PI*sigma*sigma))*exp(-(x*x+y*y)/(2.0*sigma*sigma));
             sum += value;
             for(l = 0; l < k; l++){
               set_val(gaussian, i, j, l, value);
