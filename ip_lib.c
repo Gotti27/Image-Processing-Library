@@ -1,7 +1,7 @@
 /*
  Created by Sebastiano Vascon on 23/03/20.
 */
-
+/* id : 75; alessi campanelli 878170, lorenzo vigoni 880299, mario gottardo 879088, alberto baesso 880111*/
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
