@@ -4,6 +4,8 @@
  Sebastiano Vascon
 */
 
+/* id : 75; alessi campanelli 878170, lorenzo vigoni 880299, mario gottardo 879088, alberto baesso 880111*/
+
 #ifndef IP_LIB_H
 #define IP_LIB_H
 
