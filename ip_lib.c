@@ -223,14 +223,14 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
 
 ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
   unsigned int i, j, l;
-  ip_mat * sum = ip_mat_copy(a);
+  ip_mat * sum;
 
   if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
     printf("Matrice nulla o dimensioni non coincidenti\n");
-    ip_mat_free(sum);
     exit(1);
   }
 
+  sum = ip_mat_copy(a);
   for (i = 0; i < a->h; i++) {
     for(j = 0; j < a->w; j++){
       for(l = 0; l < a->k; l++){
@@ -245,14 +245,14 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
 
 ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     unsigned int i, j, l;
-    ip_mat * sub = ip_mat_copy(a);
+    ip_mat * sub;
 
     if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
       printf("Matrice nulla o dimensioni non coincidenti\n");
-      ip_mat_free(sub);
       exit(1);
     }
-
+    
+    sub = ip_mat_copy(a);
     for (i = 0; i < a->h; i++) {
         for(j = 0; j < a->w; j++){
             for(l = 0; l < a->k; l++){
@@ -267,14 +267,14 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
 
 ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
   unsigned int i, j, l;
-  ip_mat * mus = ip_mat_copy(a);
+  ip_mat * mus;
 
   if (!a){
     printf("Matrice non valida\n");
-    ip_mat_free(mus);
     exit(1);
   }
 
+  mus = ip_mat_copy(a);
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
       for( l=0; l<a->k; l++){
@@ -290,14 +290,14 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
 
 ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
   unsigned int i, j, l;
-  ip_mat * ads = ip_mat_copy(a);
+  ip_mat * ads;
 
   if (!a){
     printf("Matrice non valida\n");
-    ip_mat_free(ads);
     exit(1);
   }
 
+  ads = ip_mat_copy(a);
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
       for( l=0; l<a->k; l++){
@@ -312,14 +312,14 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
 
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
   unsigned int i, j, l;
-  ip_mat * mean = ip_mat_copy( a );
+  ip_mat * mean;
 
   if (!a || !b || a->w != b->w || a->h != b->h || a->k != b->k){
     printf("Matrice nulla o dimensioni non coincidenti\n");
-    ip_mat_free(mean);
     exit(1);
   }
 
+  mean = ip_mat_copy( a );
   for (i = 0; i < a->h; i++) {
       for(j = 0; j < a->w; j++){
           for(l = 0; l < a->k; l++){
@@ -333,14 +333,14 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
 
 ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     unsigned int i, j, l;
-    ip_mat *bw = ip_mat_create(in->h, in->w, in->k, 1.0);
+    ip_mat *bw;
 
     if( !in ){
-      printf("Matrice non valida");
-      ip_mat_free(bw);
+      printf("Matrice non valida\n");
       exit(1);
     }
-
+  
+    bw = ip_mat_create(in->h, in->w, in->k, 1.0);
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
           float mean = 0;
@@ -379,32 +379,32 @@ ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
 
 
 ip_mat * ip_mat_brighten(ip_mat * a, float bright){
- ip_mat * lux = ip_mat_add_scalar(a,  bright);
+  ip_mat * lux;
 
- if(!a){
-   printf("Matrice non nulla");
-   ip_mat_free(lux);
-   exit(1);
- }
+  if(!a){
+    printf("Matrice non valida\n");
+    exit(1);
+  }
 
- compute_stats (lux);
- return lux;
+  lux = ip_mat_add_scalar(a,  bright);
+  compute_stats (lux);
+  return lux;
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
     unsigned int i, j, l;
-    ip_mat * b = ip_mat_copy(a);
+    ip_mat * b;
 
     if (!a || amount < 0 || amount > 255){
-      printf("Amount non compreso tra 0 e 255 o matrice nulla");
-      ip_mat_free(b);
+      printf("Amount non compreso tra 0 e 255 o matrice nulla\n");
       exit(1);
     }
 
+    b = ip_mat_copy(a);
     for(i = 0; i < a->h; i++){
       for(j = 0; j < a->w; j++){
         for(l = 0; l < a->k; l++){
-          b->data[i][j][l] += get_normal_random(0, 2*amount);
+          b->data[i][j][l] += get_normal_random(0, amount/2);
         }
       }
     }
@@ -428,7 +428,7 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     }
   }
   else{
-    printf("Dimensioni filtro/foto non compatibili o matrie nuulla\n");
+    printf("Dimensioni filtro/foto non compatibili o matrie nulla\n");
     exit(1);
   }
 
@@ -456,7 +456,7 @@ ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
   unsigned int i,j,l;
 
   if (!a){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
@@ -513,9 +513,6 @@ ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
 }
 
 ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, float sigma){
-    /*da ricontrollare prima della consegna
-    si creano k canali uguali
-    */
     ip_mat * gaussian = ip_mat_create(h, w, k, 1.0);
     unsigned int i, j, l;
     int x, y;
@@ -544,7 +541,7 @@ void rescale(ip_mat * t, float new_max){
   unsigned int i, j, l;
 
   if(!t){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
@@ -561,7 +558,7 @@ void clamp(ip_mat * t, float low, float high){
   unsigned int i, j, l;
 
   if(!t){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
