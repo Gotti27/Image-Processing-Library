@@ -117,7 +117,7 @@ void compute_stats(ip_mat * t){
 }
 
 
-void ip_mat_init_random(ip_mat * t, float mean, float var){
+void ip_mat_init_random(ip_mat * t, float mean, float std){
   unsigned int i, j, l;
   if( !t ){
     printf("Matrice non valida");
@@ -127,7 +127,7 @@ void ip_mat_init_random(ip_mat * t, float mean, float var){
   for (i = 0; i < t->h; i++){
     for (j = 0; j < t->w; j++){
       for (l = 0; l < t->k; l++){
-        t->data[i][j][l] = get_normal_random(mean, var);
+        t->data[i][j][l] = get_normal_random(mean, std);
       }
     }
   }
