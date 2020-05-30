@@ -404,7 +404,7 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
     }
 
     b = ip_mat_copy(a);
-    ip_mat_init_random(b, 0, amount/2);
+    ip_mat_init_random(b, 0, amount);
     b = ip_mat_sum(a, b);
     compute_stats(b);
     return b;
