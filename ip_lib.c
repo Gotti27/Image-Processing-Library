@@ -1,7 +1,7 @@
 /*
  Created by Sebastiano Vascon on 23/03/20.
-*/
-/* id : 75; alessi campanelli 878170, lorenzo vigoni 880299, mario gottardo 879088, alberto baesso 880111*/
+ id : 75; Alessio Campanelli 878170, Lorenzo Vigoni 880299, Mario Gottardo 879088, Alberto Baesso 880111
+ */
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
@@ -473,8 +473,6 @@ ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
 
 }
 
-}
-
 
 ip_mat * create_sharpen_filter(){
   ip_mat *sharpen = ip_mat_create(3,3,1,0.0);
@@ -524,17 +522,17 @@ ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
 ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, float sigma){
     ip_mat * gaussian;
     unsigned int i, j, l;
-    int x, y;
-    
+    int x, y, cx, cy;
+    float sum = 0.0;
+
     if (h%2 == 0 || w%2 == 0 || k == 0){
         printf("Il filtro deve avere dimensioni dispari e k > 0\n");
         exit(1);
     }
-    
+
     gaussian = ip_mat_create(h, w, k, 1.0);
-    int cx = (w-1) / 2;
-    int cy = (h-1) / 2;
-    float sum = 0.0;
+    cx = (w-1) / 2;
+    cy = (h-1) / 2;
     for(i = 0; i < h; i++){
         for(j = 0; j < w; j++){
             float value;
