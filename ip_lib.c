@@ -507,15 +507,29 @@ ip_mat * create_emboss_filter(){
 ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
   float c=1.0/(w*h);
 
-  ip_mat * avg = ip_mat_create(w,h,k,c);
+  ip_mat * avg;
+  
+  if (h%2 == 0 || w%2 == 0 || k == 0){
+    printf("Il filtro deve avere dimensioni dispari e k > 0\n");
+    exit(1);
+  }
+  
+  avg = ip_mat_create(w,h,k,c);
   compute_stats(avg);
   return avg;
 }
 
 ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, float sigma){
-    ip_mat * gaussian = ip_mat_create(h, w, k, 1.0);
+    ip_mat * gaussian;
     unsigned int i, j, l;
     int x, y;
+    
+    if (h%2 == 0 || w%2 == 0 || k == 0){
+        printf("Il filtro deve avere dimensioni dispari e k > 0\n");
+        exit(1);
+    }
+    
+    gaussian = ip_mat_create(h, w, k, 1.0);
     int cx = (w-1) / 2;
     int cy = (h-1) / 2;
     float sum = 0.0;
