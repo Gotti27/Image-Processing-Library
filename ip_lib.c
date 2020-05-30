@@ -234,7 +234,7 @@ ip_mat * ip_mat_sum(ip_mat * a, ip_mat * b){
   for (i = 0; i < a->h; i++) {
     for(j = 0; j < a->w; j++){
       for(l = 0; l < a->k; l++){
-        sum->data[i][j][l] = a->data[i][j][l] + b->data[i][j][l];
+        sum->data[i][j][l] += b->data[i][j][l];
       }
     }
   }
@@ -256,7 +256,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
     for (i = 0; i < a->h; i++) {
         for(j = 0; j < a->w; j++){
             for(l = 0; l < a->k; l++){
-                sub->data[i][j][l] = a->data[i][j][l] - b->data[i][j][l];
+                sub->data[i][j][l] -= b->data[i][j][l];
             }
         }
     }
@@ -278,7 +278,7 @@ ip_mat * ip_mat_mul_scalar(ip_mat *a, float c){
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
       for( l=0; l<a->k; l++){
-        mus->data[i][j][l]=c*(a->data[i][j][l]);
+        mus->data[i][j][l] *= c;
       }
     }
   }
@@ -301,7 +301,7 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
   for( i=0; i<a->h; i++){
     for( j=0; j<a->w;j++){
       for( l=0; l<a->k; l++){
-        ads->data[i][j][l]=c+(a->data[i][j][l]);
+        ads->data[i][j][l] += c;
       }
     }
   }
