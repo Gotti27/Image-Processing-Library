@@ -456,20 +456,22 @@ ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
   unsigned int i,j,l;
 
   if (!a){
-    printf("Matrice non valida\n");
+    printf("Matrice non valida");
     exit(1);
   }
 
   padd = ip_mat_create (a->h+(pad_h*2),a->w+(pad_w*2),a->k,0);
 
-    for (i = pad_h; i < padd->h-pad_h; i++) {
-        for(j = pad_w; j < padd->w-pad_h; j++){
-            for(l = 0; l < padd->k; l++){
-                padd->data[i][j][l] = a->data[i][j][l];
-            }
-        }
-    }
+  for (i = 0; i < a->h; i++) {
+      for(j = 0; j < a->w; j++){
+          for(l = 0; l < padd->k; l++){
+              padd->data[i+pad_h][j+pad_w][l] = a->data[i][j][l];
+          }
+      }
+  }
   return padd;
+
+}
 
 }
 
