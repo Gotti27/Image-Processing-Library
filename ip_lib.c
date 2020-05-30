@@ -1,7 +1,7 @@
 /*
  Created by Sebastiano Vascon on 23/03/20.
- id : 75; Alessio Campanelli 878170, Lorenzo Vigoni 880299, Mario Gottardo 879088, Alberto Baesso 880111
- */
+*/
+/* id : 75; Alessio Campanelli 878170, Lorenzo Vigoni 880299, Mario Gottardo 879088, Alberto Baesso 880111*/
 #include <stdio.h>
 #include "ip_lib.h"
 #include "bmp.h"
@@ -29,7 +29,6 @@ ip_mat * ip_mat_create(unsigned int h, unsigned int w, unsigned int k, float v){
     st[i].mean = v;
   }
   nuova->stat = st;
-
 
   p3 = malloc (h * sizeof(float**));
   for ( i = 0; i < h; i++){
@@ -89,7 +88,7 @@ void compute_stats(ip_mat * t){
   float min,max,mean;
 
   if( !t ){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
@@ -120,7 +119,7 @@ void compute_stats(ip_mat * t){
 void ip_mat_init_random(ip_mat * t, float mean, float std){
   unsigned int i, j, l;
   if( !t ){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
@@ -143,7 +142,7 @@ ip_mat * ip_mat_copy(ip_mat * in){
       exit(1);
     }
 
-    copia = ip_mat_create(in->h, in->w, in->k, 1.0);
+    copia = ip_mat_create(in->h, in->w, in->k, 0.0);
     for (i = 0; i < in->h; i++) {
         for(j = 0; j < in->w; j++){
             for(l = 0; l < in->k; l++){
@@ -164,7 +163,7 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
   ip_mat * nuova;
 
   if(row <= 0 || col <= 0 || !t ||row_end > t->h || col_end > t->w ){
-    printf("Matrice non valida o valori errati");
+    printf("Matrice non valida o valori errati\n");
     exit(1);
   }
 
@@ -187,6 +186,11 @@ ip_mat * ip_mat_concat(ip_mat * a, ip_mat * b, int dimensione){
   ip_mat * out;
   unsigned int i,j,l;
   unsigned int di=0, dj=0, dl=0;
+
+  if(!a || !b){
+    printf("Matrice non valida\n");
+    exit(1);
+  }
 
   if (dimensione == 0 && a->w == b-> w && a->k == b->k){
     out = ip_mat_create((a->h + b->h), a->w,a->k,  0);
@@ -251,7 +255,7 @@ ip_mat * ip_mat_sub(ip_mat * a, ip_mat * b){
       printf("Matrice nulla o dimensioni non coincidenti\n");
       exit(1);
     }
-    
+
     sub = ip_mat_copy(a);
     for (i = 0; i < a->h; i++) {
         for(j = 0; j < a->w; j++){
@@ -339,7 +343,7 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
       printf("Matrice non valida\n");
       exit(1);
     }
-  
+
     bw = ip_mat_create(in->h, in->w, in->k, 1.0);
     for(i = 0; i < in->h; i++){
         for(j = 0; j < in->w; j++){
@@ -392,7 +396,6 @@ ip_mat * ip_mat_brighten(ip_mat * a, float bright){
 }
 
 ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
-    unsigned int i, j, l;
     ip_mat * b;
 
     if (!a || amount < 0 || amount > 255){
@@ -401,13 +404,8 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
     }
 
     b = ip_mat_copy(a);
-    for(i = 0; i < a->h; i++){
-      for(j = 0; j < a->w; j++){
-        for(l = 0; l < a->k; l++){
-          b->data[i][j][l] += get_normal_random(0, amount/2);
-        }
-      }
-    }
+    ip_mat_init_random(b, 0, amount/2);
+    b = ip_mat_sum(a, b);
     compute_stats(b);
     return b;
 }
@@ -448,19 +446,21 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   	}
   }
   ip_mat_free(filter);
+  compute_stats(filtered);
   return filtered;
 }
+
 
 ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
   ip_mat *padd;
   unsigned int i,j,l;
 
   if (!a){
-    printf("Matrice non valida");
+    printf("Matrice non valida\n");
     exit(1);
   }
 
-  padd = ip_mat_create (a->h+(pad_h*2),a->w+(pad_w*2),a->k,0);
+  padd = ip_mat_create (a->h+(pad_h*2), a->w+(pad_w*2), a->k, 0);
 
   for (i = 0; i < a->h; i++) {
       for(j = 0; j < a->w; j++){
@@ -469,8 +469,8 @@ ip_mat * ip_mat_padding(ip_mat * a, unsigned int pad_h, unsigned int pad_w){
           }
       }
   }
+  compute_stats(padd);
   return padd;
-
 }
 
 
@@ -508,12 +508,12 @@ ip_mat * create_average_filter(unsigned int w, unsigned int h, unsigned int k){
   float c=1.0/(w*h);
 
   ip_mat * avg;
-  
+
   if (h%2 == 0 || w%2 == 0 || k == 0){
     printf("Il filtro deve avere dimensioni dispari e k > 0\n");
     exit(1);
   }
-  
+
   avg = ip_mat_create(w,h,k,c);
   compute_stats(avg);
   return avg;
@@ -530,7 +530,7 @@ ip_mat * create_gaussian_filter(unsigned int h, unsigned int w, unsigned int k, 
         exit(1);
     }
 
-    gaussian = ip_mat_create(h, w, k, 1.0);
+    gaussian = ip_mat_create(h, w, k, 0.0);
     cx = (w-1) / 2;
     cy = (h-1) / 2;
     for(i = 0; i < h; i++){
@@ -566,6 +566,7 @@ void rescale(ip_mat * t, float new_max){
       }
     }
   }
+  compute_stats(t);
 }
 
 void clamp(ip_mat * t, float low, float high){
@@ -586,6 +587,7 @@ void clamp(ip_mat * t, float low, float high){
       }
     }
   }
+  compute_stats(t);
 }
 
 float get_normal_random(float media, float std){
