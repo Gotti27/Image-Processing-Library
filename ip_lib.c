@@ -412,7 +412,7 @@ ip_mat * ip_mat_corrupt( ip_mat * a, float amount ){
 
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   int deltaW, deltaH;
-  ip_mat * filtered;
+  ip_mat * filtered, *out = ip_mat_create(a->h, a->w, a->k, 0);
   ip_mat * filter;
   unsigned int i, j, I, J, L;
 
@@ -430,15 +430,15 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
     exit(1);
   }
 
-  filtered = ip_mat_create( a->h - deltaH * 2, a->w - deltaW * 2, a->k, 0);
+  filtered = ip_mat_padding(a, deltaH, deltaW );
 
   for( I = deltaH; I < filtered->h - deltaH; I++ ){
   	for( J = deltaW; J < filtered->w - deltaW; J++ ){
   	  for( L = 0; L < filtered->k; L++ ){
 
-  	  	for( i = 0; i < filter->h; i++ ){
+  	  	for( i = 0; i < filter-> h; i++ ){
   	  	  for( j= 0; j < filter-> w; j++ ){
-  	  	  	filtered->data[I][J][L] += filter->data[i][j][L] * a->data[I-deltaH+i][J-deltaW+j][L];
+  	  	  	out->data[I-deltaH][J-deltaW][L] += filter->data[i][j][L] *filtered->data[I-deltaH+i][J-deltaW+j][L];
   	  	  }
   	  	}
 
@@ -446,8 +446,9 @@ ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f){
   	}
   }
   ip_mat_free(filter);
-  compute_stats(filtered);
-  return filtered;
+  ip_mat_free(filtered);
+  compute_stats(out);
+  return out;
 }
 
 
