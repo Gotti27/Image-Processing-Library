@@ -314,6 +314,36 @@ ip_mat *  ip_mat_add_scalar(ip_mat *a, float c){
   return ads;
 }
 
+/* Moltiplica un ip_mat "a" per un ip_mat "b". Il prodotto tra i due tensori avviene cella per cella. 
+ *
+ * c[i][j][k] = a[i][j][k] * b[i][j][k]
+ *
+ * Se "a" e "b" hanno dimensioni diverse allora l'operazione non e' possibile ( uscite con exit(1)).
+ *
+ * Il risultato viene salvato e restituito in output all'interno di una nuova ip_mat.
+ * 
+ */
+ip_mat * ip_mat_mul(ip_mat *a, ip_mat * b){
+	unsigned int i, j, l;
+	ip_mat * mul = ip_mat_create(a->h,a->w,a->k,0.0);
+	if (a->h != b->h || a->w != b->w || a->k != b->k)
+	{
+		printf("L'operazione non e' possibile");
+		exit(1);
+	}
+	for (int i = 0; i < a->h; i++)
+	{
+		for (int j = 0; j < a->w; j++)
+		{
+			for (int l = 0; l < a->k; l++)
+			{
+				mul->data[i][j][l] = a->data[i][j][l] * b->data[i][j][l];
+			}
+		}
+	}
+	return mul;
+}
+
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b){
   unsigned int i, j, l;
   ip_mat * mean;
@@ -360,6 +390,43 @@ ip_mat * ip_mat_to_gray_scale(ip_mat * in){
     return bw;
 }
 
+
+ip_mat * ip_mat_warhol(ip_mat * in){
+	unsigned int i, j;
+	ip_mat * switchRG, * switchGB, * switchRB;/*lavoro sul k della matrice*/
+	ip_mat * out, *half_left, *half_right;
+
+	switchRG = ip_mat_create(in->h,in->w,in->k,0);
+	switchGB = ip_mat_create(in->h,in->w,in->k,0);
+	switchRB = ip_mat_create(in->h,in->w,in->k,0);
+
+	for (i = 0; i < in->h; i++) {
+    	for(j = 0; j < in->w; j++){
+        	switchRG->data[i][j][0] = in->data[i][j][1]; /*top dx*/
+            switchRG->data[i][j][1] = in->data[i][j][0];
+            switchRG->data[i][j][2] = in->data[i][j][2];
+
+            switchGB->data[i][j][1] = in->data[i][j][2]; /*bottom sx*/
+            switchGB->data[i][j][2] = in->data[i][j][1];
+			switchGB->data[i][j][0] = in->data[i][j][0];
+
+            switchRG->data[i][j][0] = in->data[i][j][2]; /*bottom dx*/
+            switchRG->data[i][j][2] = in->data[i][j][0];
+            switchRG->data[i][j][1] = in->data[i][j][1];
+      	}
+  	}
+  	half_left = ip_mat_concat(in,switchGB,0);
+  	half_right = ip_mat_concat(switchRG,switchRB,0);
+  	out = ip_mat_concat(half_left,half_right,1);
+  	ip_mat_free(switchRG):
+  	ip_mat_free(switchGB);
+  	ip_mat_free(switchRB):
+  	ip_mat_free(half_left);
+  	ip_mat_free(half_right):
+
+  	return out;
+
+}
 
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha) {
   ip_mat * blended;
@@ -491,6 +558,30 @@ ip_mat * create_edge_filter(){
   set_val(edge,1,1,0,8.0);
   compute_stats(edge);
   return edge;
+}
+
+ip_mat * create_sobel_horizontal(){
+  ip_mat *sobelHzl = ip_mat_create(3,3,1,0.0);
+  set_val(sobelHzl,0,0,0,-1.0);
+  set_val(sobelHzl,0,2,0,-1.0);
+  set_val(sobelHzl,0,1,0,2.0);
+  set_val(sobelHzl,2,1,0,2.0);
+  set_val(sobelHzl,2,0,0,1.0);
+  set_val(sobelHzl,2,2,0,1.0);
+  compute_stats(sobelHzl);
+  return sobelHzl;	
+}
+
+ip_mat * create_sobel_vertical(){
+  ip_mat *sobelVtl = ip_mat_create(3,3,1,0.0);
+  set_val(sobelVtl,0,0,0,-1.0);
+  set_val(sobelVtl,2,0,0,-1.0);
+  set_val(sobelVtl,1,0,0,2.0);
+  set_val(sobelVtl,1,2,0,2.0);
+  set_val(sobelVtl,0,2,0,1.0);
+  set_val(sobelVtl,2,2,0,1.0);
+  compute_stats(sobelVtl);
+  return sobelVtl;
 }
 
 ip_mat * create_emboss_filter(){
