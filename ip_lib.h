@@ -4,8 +4,6 @@
  Sebastiano Vascon
 */
 
-/* id : 75; alessi campanelli 878170, lorenzo vigoni 880299, mario gottardo 879088, alberto baesso 880111*/
-
 #ifndef IP_LIB_H
 #define IP_LIB_H
 
@@ -35,14 +33,14 @@ typedef struct {
 
 /**** PARTE 1: TIPO DI DATI ip_mat E MEMORIA ****/
 
-/* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento Ã¨ inizializzato a v.
+/* Inizializza una ip_mat con dimensioni h w e k. Ogni elemento è inizializzato a v.
  * Inoltre crea un vettore di stats per contenere le statische sui singoli canali.
  * */
 ip_mat * ip_mat_create(unsigned int h, unsigned int w,unsigned  int k, float v);
 
 /* Libera la memoria (data, stat e la struttura)
  *
- * se la variabile "a" Ã¨ NULL non fa nulla.
+ * se la variabile "a" è NULL non fa nulla.
  *
  * */
 void ip_mat_free(ip_mat *a);
@@ -59,7 +57,7 @@ void set_val(ip_mat * a, unsigned int i,unsigned int j,unsigned int k, float v);
 void compute_stats(ip_mat * t);
 
 /* Inizializza una ip_mat con dimensioni w h e k.
- * Ogni elemento Ã¨ generato da una gaussiana con media mean e deviazione std */
+ * Ogni elemento è generato da una gaussiana con media mean e deviazione std */
 void ip_mat_init_random(ip_mat * t, float mean, float std);
 
 /* Crea una copia di una ip_mat e lo restituisce in output */
@@ -78,19 +76,19 @@ ip_mat * ip_mat_subset(ip_mat * t, unsigned int row_start, unsigned int row_end,
 /* Concatena due ip_mat su una certa dimensione.
  * Ad esempio:
  * ip_mat_concat(ip_mat * a, ip_mat * b, 0);
- *      produrrÃ  un nuovo ip_mat di dimensioni:
+ *      produrrà un nuovo ip_mat di dimensioni:
  *      out.h = a.h + b.h
  *      out.w = a.w = b.w
  *      out.k = a.k = b.k
  *
  * ip_mat_concat(ip_mat * a, ip_mat * b, 1);
- *      produrrÃ  un nuovo ip_mat di dimensioni:
+ *      produrrà un nuovo ip_mat di dimensioni:
  *      out.h = a.h = b.h
  *      out.w = a.w + b.w
  *      out.k = a.k = b.k
  *
  * ip_mat_concat(ip_mat * a, ip_mat * b, 2);
- *      produrrÃ  un nuovo ip_mat di dimensioni:
+ *      produrrà un nuovo ip_mat di dimensioni:
  *      out.h = a.h = b.h
  *      out.w = a.w = b.w
  *      out.k = a.k + b.k
@@ -137,6 +135,19 @@ ip_mat * ip_mat_add_scalar(ip_mat *a, float c);
  */
 ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b);
 
+
+/* Moltiplica un ip_mat "a" per un ip_mat "b". Il prodotto tra i due tensori avviene cella per cella. 
+ *
+ * c[i][j][k] = a[i][j][k] * b[i][j][k]
+ *
+ * Se "a" e "b" hanno dimensioni diverse allora l'operazione non e' possibile ( uscite con exit(1)).
+ *
+ * Il risultato viene salvato e restituito in output all'interno di una nuova ip_mat.
+ * 
+ */
+ip_mat * ip_mat_mul(ip_mat *a, ip_mat * b);
+
+
 /**** PARTE 2: SEMPLICI OPERAZIONI SU IMMAGINI ****/
 /* Converte un'immagine RGB ad una immagine a scala di grigio.
  * Quest'operazione viene fatta calcolando la media per ogni pixel sui 3 canali
@@ -148,14 +159,30 @@ ip_mat * ip_mat_mean(ip_mat * a, ip_mat * b);
  * */
 ip_mat * ip_mat_to_gray_scale(ip_mat * in);
 
+
+/*
+* Data una immagine di input crea un’immagine nuova in stile “Andy Warhol”.
+* L’immagine risultante è una composizione di 4 immagini così realizzate:
+* - In alto a sinistra viene replicata l’immagine originale
+* - In alto a destra, a partire dall’immagine originale, viene invertito il canale Rosso con il canale Verde
+* - In basso a sinistra, a partire dall’immagine originale, viene invertito il canale Verde con il canale Blu
+* - In basso a destra, a partire dall’immagine originale, viene invertito il canale Rosso con il canale Blu
+* 
+* L’immagine finale avrà quindi dimensione doppia dell’originale (a parte nel numero di canali) in quanto le 4 immagini saranno concatenate per formarne una unica.
+*/
+ip_mat * ip_mat_warhol(ip_mat * in);
+
+
 /* Effettua la fusione (combinazione convessa) di due immagini.
  *
  * I parametri della funzione non subiscono modiche, il risultato viene salvato e restituito in output
  * all'interno di una nuova ip_mat.
+ *
+ * Le variabili "a" e "b" devono avere le stesse dimensioni
  */
 ip_mat * ip_mat_blend(ip_mat * a, ip_mat * b, float alpha);
 
-/* Operazione di brightening: aumenta la luminositÃ  dell'immagine
+/* Operazione di brightening: aumenta la luminosità dell'immagine
  * aggiunge ad ogni pixel un certo valore
  *
  * I parametri della funzione non subiscono modiche, il risultato viene salvato e restituito in output
@@ -184,9 +211,9 @@ ip_mat * ip_mat_corrupt(ip_mat * a, float amount);
  */
 ip_mat * ip_mat_convolve(ip_mat * a, ip_mat * f);
 
-/* Aggiunge un padding all'immagine. Il padding verticale Ã¨ pad_h mentre quello
- * orizzontale Ã¨ pad_w.
- * L'output sarÃ  un'immagine di dimensioni:
+/* Aggiunge un padding all'immagine. Il padding verticale è pad_h mentre quello
+ * orizzontale è pad_w.
+ * L'output sarà un'immagine di dimensioni:
  *      out.h = a.h + 2*pad_h;
  *      out.w = a.w + 2*pad_w;
  *      out.k = a.k
@@ -204,7 +231,13 @@ ip_mat * create_sharpen_filter();
 /* Crea un filtro per rilevare i bordi */
 ip_mat * create_edge_filter();
 
-/* Crea un filtro per aggiungere profonditÃ  */
+/* Crea un filtro di Sobel per rilevare i bordi orizzontali */
+ip_mat * create_sobel_horizontal();
+
+/* Crea un filtro di Sobel per rilevare i bordi verticali */
+ip_mat * create_sobel_vertical();
+
+/* Crea un filtro per aggiungere profondità */
 ip_mat * create_emboss_filter();
 
 /* Crea un filtro medio per la rimozione del rumore */
